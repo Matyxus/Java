@@ -2,7 +2,7 @@ package chess2.managers;
 import chess2.PopUps;
 import chess2.board.GameBoard;
 import chess2.board.Spot;
-import components.FileChooser;
+import chess2.components.FileChooser;
 import java.util.HashMap;
 import java.io.BufferedReader;
 import java.io.File;
