@@ -2,28 +2,33 @@ package main;
 
 import java.awt.image.BufferStrategy;
 import java.awt.Graphics;
-/*
+
+import states.State;
 import managers.GraphicsManager;
-import managers.MouseManager;
+/*
 import states.BoardPlacementState;
 import states.GameState;
-import states.State;
 import states.ViewerState;
 */
 
-
 public class Game {
-    public final int width, height;
-    public final String title;
-    
+    private int width, height;
     private boolean running = false;
-    // screen
+    // Screen
     private BufferStrategy bs;
     private Graphics g;
+    private final Display display;
+    private final GraphicsManager graphicsManager;
+    // Board and mouse.
+    private final Handler handler;
+
+
     public Game(String title, int width, int height) {
         this.width = width;
         this.height = height;
-        this.title = title;
+        this.handler = new Handler();
+        this.graphicsManager = new GraphicsManager(handler);
+        this.display = new Display(title, width, height, handler);
     }
 
     // draw to screen using Buffer
@@ -54,41 +59,28 @@ public class Game {
         long after;
         long now;
         long wait;
-        init();
+        running = true;
         while (running) {
             now = System.nanoTime();
-            System.out.println("In game loop");
-            /*
-            if (mouseManager.leftPressed() || mouseManager.rightPressed()) {// check for input
-                update();
+            // Check if input happened.
+            if (handler.getMouseManager().leftPressed() || handler.getMouseManager().rightPressed()) {
+                System.out.println("Clicked on coord: " + handler.getMouseManager().getMouseX() + "  " +
+                    handler.getMouseManager().getMouseY());
+                //update();
             }
             //necessary, game loop is too fast, reset mouse buttons
-            mouseManager.setLeftClick(false);
-            mouseManager.setRightClick(false);
-            */
+            handler.getMouseManager().setLeftClick(false);
+            handler.getMouseManager().setRightClick(false);
+            
             after = System.nanoTime() - now;
-            wait =  Math.abs((OPTIMAL_TIME - after) / 1000000);
+            wait = Math.abs((OPTIMAL_TIME - after) / 1000000);
             try {
-                Thread.sleep(wait);
                 render();
+                Thread.sleep(wait);
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 running = false;
             }
         }
-    }
-
-    // init display
-    private void init() {
-        display = new Display(title, width, height);
-        display.getFrame().addMouseListener(mouseManager);
-        display.getFrame().addMouseMotionListener(mouseManager);
-        display.getCanvas().addMouseListener(mouseManager);
-        display.getCanvas().addMouseMotionListener(mouseManager);
-        //Either Frame or Canvas is active, so they will get the listener
-        handler = new Handler(this);
-        graphicsManager = new GraphicsManager(handler);
-        BoardPlacementState = new BoardPlacementState(handler);
-        State.setState(BoardPlacementState);
     }
 }
