@@ -21,7 +21,6 @@ public class Assets {
     //public BufferedImage back_button;
     //public BufferedImage marker;
     //public BufferedImage perft_button;
-    //public BufferedImage[] pawn, rook, king, queen, tower, knight, bishop;
     private BufferedImage[][] pieces;
     //public BufferedImage[] arrows; //0-left, 1-right
 

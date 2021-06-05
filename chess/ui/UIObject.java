@@ -38,7 +38,25 @@ public abstract class UIObject {
             onClick();
         }
     }
-    //Getters and setters
+    
+    // -------- Getters -------- 
+    
+    public boolean getShow(){
+        return show;
+    }
+
+    public boolean isOccupied(){
+        return piece != -1;
+    }
+
+    public BufferedImage getImage() {
+        return image;
+    }
+
+    public int getPiece() {
+        return piece;
+    }
+    
     public int getHeight() {
         return height;
     }
@@ -54,6 +72,8 @@ public abstract class UIObject {
     public float getY() {
         return y;
     }
+
+    // -------- Setters -------- 
 
     public void setHeight(int height) {
         this.height = height;
@@ -73,21 +93,5 @@ public abstract class UIObject {
     
     public void setY(float y) {
         this.y = y;
-    }
-
-    public boolean getShow(){
-        return show;
-    }
-
-    public boolean isOccupied(){
-        return piece != -1;
-    }
-
-    public BufferedImage getImage() {
-        return image;
-    }
-
-    public int getPiece() {
-        return piece;
     }
 }

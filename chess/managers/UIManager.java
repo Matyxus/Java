@@ -1,36 +1,16 @@
 package managers;
 
-import main.Handler;
 import ui.UIObject;
-
 import java.util.ArrayList;
 import java.awt.Graphics;
 import java.awt.event.MouseEvent;
 
 public class UIManager {
 
-    private Handler handler;
     private ArrayList<UIObject> objects;
 
-    public UIManager(Handler handler) {
-        this.handler = handler;
+    public UIManager() {
         objects = new ArrayList<UIObject>();
-    }
-
-    public void setHandler(Handler handler) {
-        this.handler = handler;
-    }
-
-    public Handler getHandler() {
-        return handler;
-    }
-
-    public void setObjects(ArrayList<UIObject> objects) {
-        this.objects = objects;
-    }
-
-    public ArrayList<UIObject> getObjects() {
-        return objects;
     }
 
     public void render(Graphics g) {
@@ -59,8 +39,20 @@ public class UIManager {
         objects.remove(o);
     }
 
-    public void clean() {
+    public void clear() {
         objects.clear();
+    }
+    
+    // -------- Setters -------- 
+
+    public void setObjects(ArrayList<UIObject> objects) {
+        this.objects = objects;
+    }
+
+    // -------- Getters -------- 
+
+    public ArrayList<UIObject> getObjects() {
+        return objects;
     }
 
 }
