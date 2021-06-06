@@ -8,13 +8,10 @@ import board.constants.Colors;
 import board.constants.Pieces;
 
 public class ImageManager {
-    // square dimensions
+    // Chess board square dimensions
     private final int PIECE_WIDTH = 80;
     private final int PIECE_HEIGHT = 60;
     private final String absPath = new File("").getAbsolutePath();
-
-    //private int BOARD_WIDTH;
-    //private int BOARD_HEIGHT;
 
     private BufferedImage board;
     //private BufferedImage button_start, button_quit;
@@ -32,6 +29,9 @@ public class ImageManager {
         init();
     }
     
+    /**
+     * Loads images.
+     */
     private void init() {
         sheet = loadImage(absPath + "\\chess\\img\\sheet.png");
         pieces = new BufferedImage[6][2];
@@ -56,6 +56,10 @@ public class ImageManager {
         */
     }
 
+    /**
+     * @param path of image
+     * @return BufferedImage if succesfull, null otherwise.
+     */
     private BufferedImage loadImage(String path) {
         try {
             return ImageIO.read(new File(path));
@@ -66,16 +70,31 @@ public class ImageManager {
         return null;
     }
 
+    /**
+     * @param x
+     * @param y
+     * @param width
+     * @param height
+     * @return subimage of sheet.
+     */
     private BufferedImage crop(int x, int y, int width, int height) {
         return sheet.getSubimage(x, y, width, height);
     }
 
     // ------ Getters ------ 
 
+    /**
+     * @param piece
+     * @param color of piece
+     * @return BufferedImage of given piece.
+     */
     public BufferedImage getPieceImg(Pieces piece, Colors color) {
         return pieces[piece.ordinal()][color.ordinal()];
     }
 
+    /**
+     * @return The chess board.
+     */
     public BufferedImage getBoard() {
         return board;
     }

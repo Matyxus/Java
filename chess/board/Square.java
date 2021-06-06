@@ -35,7 +35,12 @@ public class Square {
     public long getAttacks() {
         return attacks;
     }
-
+    
+    /**
+     * 
+     * @param moves
+     * Sets new moves for this piece.
+     */
     public void setMoves(long moves) {
         this.moves = moves;
     }
@@ -48,14 +53,28 @@ public class Square {
         return piece;
     }
 
+    /**
+     * 
+     * @return true if piece has moved, false otherwise.
+     */
     public boolean getHasMoved() {
         return hasMoved;
     }
     
+    /**
+     * 
+     * @param path modifies current moves, so that
+     * they are only on path.
+     */
     public void modifyMoves(long path){
         moves &= path;
     }
 
+    /**
+     * 
+     * @param attacks
+     * Sets new attacks for this piece.
+     */
     public void setAttacks(long attacks) {
         this.attacks = attacks;
     }

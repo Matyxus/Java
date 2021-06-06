@@ -21,7 +21,7 @@ public class Player {
     }
 
     /**
-     * Resets values to 0, and clears hashmap of pieces.
+     * Resets bitboards to 0, and clears hashmap of pieces.
      */
     public void resetVals() {
         allPieces = Holder.ZERO;

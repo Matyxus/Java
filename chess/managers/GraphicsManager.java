@@ -30,8 +30,7 @@ public class GraphicsManager {
     }
 
     /**
-     * 
-     * @param g
+     * @param g Grapghics
      * @apiNote
      * Renders chess board and all pieces on it.
      */

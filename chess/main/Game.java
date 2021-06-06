@@ -33,11 +33,14 @@ public class Game {
         State.setState(new PlacementState(handler)); // Initial state is PlacementState.
     }
 
-    // draw to screen using Buffer
+    /**
+     * Renders the state and chess board with pieces.
+     */
     private void render() {
         bs = display.getCanvas().getBufferStrategy();
+        // Add 3 buffers.
         if (bs == null) {
-            display.getCanvas().createBufferStrategy(3); // 3 buffers(hidden screens)
+            display.getCanvas().createBufferStrategy(3);
             return;
         }
         g = bs.getDrawGraphics();
@@ -53,15 +56,20 @@ public class Game {
         g.dispose(); // "dispose"
     }
 
+    /**
+     * Updates current state in response to mouse events.
+     */
     private void update() {
         if (State.getState() != null) {
             State.getState().update();
         }
     }
 
-    // init game + update it accordingly, gets called when start is called
+    /**
+     * Starts the game.
+     */
     public void run() {
-        // 60 fps setup
+        // 60 fps setup.
         final int TARGET_FPS = 60;
         final long OPTIMAL_TIME = 1000000000 / TARGET_FPS;
         long after;
@@ -79,7 +87,7 @@ public class Game {
             //necessary, game loop is too fast, reset mouse buttons
             handler.getMouseManager().setLeftClick(false);
             handler.getMouseManager().setRightClick(false);
-            
+            // Calculate if previous waiting was correct.
             after = System.nanoTime() - now;
             wait = Math.abs((OPTIMAL_TIME - after) / 1000000);
             try {
