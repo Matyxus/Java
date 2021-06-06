@@ -12,10 +12,7 @@ public class Assets {
     // square dimensions
     public final int PIECE_WIDTH = 80; // == SQUARE_WIDTH
     public final int PIECE_HEIGHT = 60; // == SQUARE_HEGIHT
-    public final int BOARD_SQUARES = 64;
-    private final String absPath = new File("").getAbsolutePath();
-  
-
+    
     private BufferedImage board;
     //public BufferedImage button_start, button_quit;
     //public BufferedImage back_button;
@@ -26,13 +23,12 @@ public class Assets {
 
     private BufferedImage sheet;
     
-
     public Assets(int width, int height) {
-        System.out.println("Abs path: " + absPath);
         init();
     }
     
     private void init() {
+        String absPath = new File("").getAbsolutePath();
         sheet = loadImage(absPath + "\\chess\\images\\sheet.png");
         pieces = new BufferedImage[6][2];
         int counter = 0;
@@ -56,6 +52,11 @@ public class Assets {
         */
     }
 
+    /**
+     * 
+     * @param path to file
+     * @return Buffered image or null if failed to load
+     */
     private BufferedImage loadImage(String path) {
         try {
             return ImageIO.read(new File(path));
@@ -66,18 +67,85 @@ public class Assets {
         return null;
     }
 
+    /**
+     * 
+     * @param x
+     * @param y
+     * @param width
+     * @param height
+     * @return BufferedImage (subimage of sheet)
+     */
     private BufferedImage crop(int x, int y, int width, int height) {
         return sheet.getSubimage(x, y, width, height);
     }
 
     // --------- Getters --------- 
 
+    /**
+     * 
+     * @param piece chess piece
+     * @param color color of chess piece
+     * @return BufferedImage of given piece of given color
+     */
     public BufferedImage getPieceImg(Pieces piece, Colors color) {
         return pieces[piece.ordinal()][color.ordinal()];
     }
-
+    
+    /**
+     * 
+     * @return chess board
+     */
     public BufferedImage getBoard() {
         return board;
+    }
+
+    /**
+     * 
+     * @return chess boards width
+     */
+    public int getBoardWidth() {
+        return board.getWidth();
+    }
+
+    /**
+     * 
+     * @return chess boards height
+     */
+    public int getBoardHeight() {
+        return board.getHeight();
+    }
+
+    /**
+     * 
+     * @param x coord of mouse
+     * @return makes window into squares (PIECE_WIDTH x PIECE_WIDTH)
+     * and returns x coord of such a square, where mouse is.
+     */
+    public int centerMouseX(int x) {
+        return ((x+PIECE_WIDTH)/(PIECE_WIDTH+1))-1;
+    }
+
+    /**
+     * 
+     * @param y coord of mouse
+     * @return makes window into squares (PIECE_HEIGHT x PIECE_HEIGHT)
+     * and returns y coord of such a square, where mouse is.
+     */
+    public int centerMouseY(int y) {
+        return ((y+PIECE_HEIGHT)/(PIECE_HEIGHT+1))-1;
+    }
+
+    /**
+     * 
+     * @param x transformed using centerMouseX
+     * @param y transformed using centerMouseY
+     * @return index of chess board square, -1 if out of range.
+     */
+    public int getBoardSquare(int x, int y) {
+        if (x < 8 && y < 8) {
+            return 8*y+x;
+        }
+        return -1;
     }
     
 }

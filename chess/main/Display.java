@@ -90,7 +90,7 @@ public class Display {
         return menuBar;
     }
 
-    /*
+    /** 
         Adds mouse listener to frame and canvas.
     */
     private void addMouseListener() {

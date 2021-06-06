@@ -13,6 +13,11 @@ import java.util.Iterator;
 import java.util.Map;
 import javax.imageio.ImageIO;
 */
+import java.util.HashMap;
+
+import board.Square;
+import board.constants.Colors;
+import board.constants.Pieces;
 
 
 public class GraphicsManager {
@@ -24,26 +29,28 @@ public class GraphicsManager {
         this.handler = handler;
     }
 
+    /**
+     * 
+     * @param g
+     * @apiNote
+     * Renders chess board and all pieces on it.
+     */
     public void render(Graphics g) {
         g.drawImage(handler.getAssets().getBoard(), 0, 0, null);
         // Pieces.
-        /*
-        Iterator<Map.Entry<Integer, Spot>> it;
-        it = handler.getGameBoard().getWhitePieces().entrySet().iterator();
-        
-        while (it.hasNext()) {
-            Map.Entry<Integer, Spot> pair = (Map.Entry<Integer, Spot>)it.next();
-            g.drawImage(handler.getAssets().pieces[pair.getValue().getPiece()][pair.getValue().getColor()],
-            handler.getAssets().PIECE_WIDTH*(pair.getKey()%8), handler.getAssets().PIECE_HEIGHT*(pair.getKey()/8), null);
-        }
+        HashMap<Integer, Square> curr = handler.getGameBoard().getPlayers(Colors.WHITE).getPlacedPieces();
+        // White pieces.
+        curr.forEach((index, square) -> {
+            g.drawImage(handler.getAssets().getPieceImg(Pieces.values()[square.getPiece()], Colors.WHITE),
+            handler.getAssets().PIECE_WIDTH*(index%8), handler.getAssets().PIECE_HEIGHT*(index/8), null);
+        });
 
-        it = handler.getGameBoard().getBlackPieces().entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry<Integer, Spot> pair = (Map.Entry<Integer, Spot>)it.next();
-            g.drawImage(handler.getAssets().pieces[pair.getValue().getPiece()][pair.getValue().getColor()],
-            handler.getAssets().PIECE_WIDTH*(pair.getKey()%8), handler.getAssets().PIECE_HEIGHT*(pair.getKey()/8), null);
-        }
-        */
+        curr = handler.getGameBoard().getPlayers(Colors.BLACK).getPlacedPieces();
+        // Black pieces.
+        curr.forEach((index, square) -> {
+            g.drawImage(handler.getAssets().getPieceImg(Pieces.values()[square.getPiece()], Colors.BLACK),
+            handler.getAssets().PIECE_WIDTH*(index%8), handler.getAssets().PIECE_HEIGHT*(index/8), null);
+        });
     }
 
     public boolean load() {

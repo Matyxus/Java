@@ -3,12 +3,13 @@ package main;
 import java.awt.image.BufferStrategy;
 import java.awt.Graphics;
 
+import states.PlacementState;
 import states.State;
 import managers.GraphicsManager;
 /*
 import states.BoardPlacementState;
 import states.GameState;
-import states.ViewerState;
+import states.ReplayState;
 */
 
 public class Game {
@@ -29,6 +30,7 @@ public class Game {
         this.handler = new Handler();
         this.graphicsManager = new GraphicsManager(handler);
         this.display = new Display(title, width, height, handler);
+        State.setState(new PlacementState(handler)); // Initial state is PlacementState.
     }
 
     // draw to screen using Buffer
@@ -51,6 +53,12 @@ public class Game {
         g.dispose(); // "dispose"
     }
 
+    private void update() {
+        if (State.getState() != null) {
+            State.getState().update();
+        }
+    }
+
     // init game + update it accordingly, gets called when start is called
     public void run() {
         // 60 fps setup
@@ -66,7 +74,7 @@ public class Game {
             if (handler.getMouseManager().leftPressed() || handler.getMouseManager().rightPressed()) {
                 System.out.println("Clicked on coord: " + handler.getMouseManager().getMouseX() + "  " +
                     handler.getMouseManager().getMouseY());
-                //update();
+                update();
             }
             //necessary, game loop is too fast, reset mouse buttons
             handler.getMouseManager().setLeftClick(false);

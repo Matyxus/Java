@@ -9,8 +9,9 @@ public class MouseManager implements MouseInputListener {
     private UIManager uiManager;
     
     public MouseManager() {};
-    
-    // Implements
+
+    // ------ Implements ------
+
     @Override
     public void mouseMoved(MouseEvent e) {
         mouseX = e.getX();
