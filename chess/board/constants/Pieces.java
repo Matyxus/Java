@@ -8,6 +8,5 @@ public enum Pieces {
     ROOK,
     KNIGHT,
     BISHOP,
-    PAWN,
-    PIECES_COUNT;
+    PAWN;
 }

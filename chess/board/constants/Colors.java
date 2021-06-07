@@ -4,6 +4,5 @@ package board.constants;
  */
 public enum Colors {
     WHITE,
-    BLACK,
-    COLORS_COUNT;
+    BLACK;
 }

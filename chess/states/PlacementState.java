@@ -7,8 +7,8 @@ import main.Handler;
 import board.Square;
 import board.constants.Colors;
 import board.constants.Pieces;
-//import ui.UIImageButton;
 import managers.UIManager;
+import ui.UIImageButton;
 
 public class PlacementState extends State {
 
@@ -38,7 +38,7 @@ public class PlacementState extends State {
             if (x < 8 && y < 8) {
                 // Place down pieces.
                 if (display || dragged) { 
-                    // awn cant be placed on 0th or 7th row.
+                    // Pawn cant be placed on 0th or 7th row.
                     if (!(displayPiece == Pieces.PAWN && (y == 0 || y == 7))) { 
                         handler.getGameBoard().placePiece(displayPiece.ordinal(), 
                             displayPieceColor.ordinal(), squareIndex);
@@ -83,35 +83,46 @@ public class PlacementState extends State {
     }
 
     protected void addButtons() {
+        
+        for (Pieces piece : Pieces.values()) {
+            // White pieces.
+            UIImageButton button = new UIImageButton(handler.getAssets().getBoardWidth(),
+                handler.getAssets().PIECE_HEIGHT * piece.ordinal(), handler.getAssets().PIECE_WIDTH, 
+                handler.getAssets().PIECE_HEIGHT, handler.getAssets().getPieceImg(piece, Colors.WHITE), null) {
+
+                @Override
+                public void onClick() {
+                    if (object != null) {
+                        display = true;
+                        img = getImage(0);
+                        displayPiece = ((Pieces) object);
+                        displayPieceColor = Colors.WHITE;
+                    }
+                    
+                }
+            };
+            button.setObject(piece);
+            this.uiManager.addObject(button);
+            // Black pieces.
+            button = new UIImageButton(handler.getAssets().getBoardWidth()+handler.getAssets().PIECE_WIDTH,
+                handler.getAssets().PIECE_HEIGHT * piece.ordinal(), handler.getAssets().PIECE_WIDTH, 
+                handler.getAssets().PIECE_HEIGHT, handler.getAssets().getPieceImg(piece, Colors.BLACK), null) {
+
+                @Override
+                public void onClick() {
+                    if (object != null) {
+                        display = true;
+                        img = getImage(0);
+                        displayPiece = ((Pieces) object);
+                        displayPieceColor = Colors.BLACK;
+                    }
+                }
+            };
+            button.setObject(piece);
+            this.uiManager.addObject(button);
+        }
+
         /*
-        for (int i = 0; i < 6; i++) { // White pieces
-            this.uiManager.addObject(new UIImageButton(Assets.BOARD_WIDTH, Assets.PIECE_HEIGHT * i, 
-                    Assets.PIECE_WIDTH, Assets.PIECE_HEIGHT, Assets.pieces[i][Holder.WHITE], i) {
-                @Override
-                public void onClick() {
-                    if (show && isOccupied()) {
-                        display = true;
-                        img = getImage();
-                        displayPiece = getPiece();
-                        displayPieceColor = 0;
-                    }
-                }
-            });
-        }
-        for (int i = 0; i < 6; i++) {// Black pieces
-            this.uiManager.addObject(new UIImageButton(720, Assets.PIECE_HEIGHT * i,
-                     Assets.PIECE_WIDTH, Assets.PIECE_HEIGHT, Assets.pieces[i][Holder.BLACK], i) {
-                @Override
-                public void onClick() {
-                    if (show && isOccupied()) {
-                        display = true;
-                        img = getImage();
-                        displayPiece = getPiece();
-                        displayPieceColor = 1;
-                    }
-                }
-            });
-        }
         this.uiManager.addObject(new UIImageButton(Assets.BOARD_WIDTH, 360, 
                 2*Assets.PIECE_WIDTH, Assets.PIECE_HEIGHT, Assets.button_start, -1) {
             @Override

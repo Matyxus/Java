@@ -6,92 +6,63 @@ import java.awt.image.BufferedImage;
 
 public abstract class UIObject {
 
-    protected float x, y;
-    protected int width, height;
-    protected Rectangle bounds;
+    protected final Rectangle bounds;
+    protected final BufferedImage[] images;
+    protected Object object;
     protected boolean hovering  = false;
-    protected boolean show = false;
-    protected int piece = -1;
-    protected BufferedImage image;
-
-    public UIObject(float x, float y, int width, int height, BufferedImage image, int piece) {
-        this.x = x;
-        this.y = y;
-        this.width = width;
-        this.height = height;
-        this.image = image;
-        this.piece = piece;
-        bounds = new Rectangle((int) x, (int) y, width, height);
+    
+    public UIObject(int x, int y, int width, int height, BufferedImage imageUP, BufferedImage imageDOWN) {
+        this.images = new BufferedImage[2];
+        this.images[0] = imageUP;
+        this.images[1] = imageDOWN;
+        this.bounds = new Rectangle((int) x, (int) y, width, height);
     }
 
     public abstract void render(Graphics g);
 
     public abstract void onClick();
 
+    /**
+     * @param e mouse event
+     * checks if mouse is hovering over UIObject
+     */
     public void onMouseMove(MouseEvent e) {
         hovering = bounds.contains(e.getX(), e.getY());
     }
 
+    /**
+     * @param e mouse event
+     * Checks if mouse was released on object while hovering, acts as mouse click.
+     */
     public void onMouseRelease(MouseEvent e) {
-        show = bounds.contains(e.getX(), e.getY());
-        if (show && e.getButton() == MouseEvent.BUTTON1) {
+        if (hovering && e.getButton() == MouseEvent.BUTTON1) {
             onClick();
         }
+    }
+
+    /**
+     * @param object
+     * Sets some additional object that may be needed on mouse click etc.
+     */
+    public void setObject(Object object) {
+        this.object = object;
     }
     
     // -------- Getters -------- 
     
-    public boolean getShow(){
-        return show;
+    /**
+     * @param up 0 if image when mouse is not hovering, 1 otherwise.
+     * @return the selected image.
+     */
+    public BufferedImage getImage(int up) {
+        return images[up];
     }
 
-    public boolean isOccupied(){
-        return piece != -1;
-    }
-
-    public BufferedImage getImage() {
-        return image;
-    }
-
-    public int getPiece() {
-        return piece;
+    /**
+     * @return bounds of UIObject
+     */
+    public Rectangle getBounds() {
+        return bounds;
     }
     
-    public int getHeight() {
-        return height;
-    }
-    
-    public int getWidth() {
-        return width;
-    }
-    
-    public float getX() {
-        return x;
-    }
-    
-    public float getY() {
-        return y;
-    }
-
-    // -------- Setters -------- 
-
-    public void setHeight(int height) {
-        this.height = height;
-    }
-    
-    public void setHovering(boolean hovering) {
-        this.hovering = hovering;
-    }
-    
-    public void setWidth(int width) {
-        this.width = width;
-    }
-    
-    public void setX(float x) {
-        this.x = x;
-    }
-    
-    public void setY(float y) {
-        this.y = y;
-    }
 }

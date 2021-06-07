@@ -24,10 +24,8 @@ public class Rays {
     private final long[] kingMoves;
     
     private final int BITS_OFFSET = 63;
-    private final Holder holder;
     
     public Rays(Holder holder) {
-        this.holder = holder;
         this.withMask = new EnumMap<Directions, Boolean>(Map.of(
             Directions.SOUTH,      false,
             Directions.NORTH,      true,
@@ -38,6 +36,7 @@ public class Rays {
             Directions.NORTH_WEST, true,
             Directions.NORTH_EAST, true
         ));
+
         this.slidingMoves = new EnumMap<Directions, long[]>(Map.of(
             Directions.SOUTH,      new long[holder.getSize(Size.ROWS)],
             Directions.NORTH,      new long[holder.getSize(Size.ROWS)],
@@ -48,16 +47,18 @@ public class Rays {
             Directions.NORTH_WEST, new long[holder.getSize(Size.ROWS)],
             Directions.NORTH_EAST, new long[holder.getSize(Size.ROWS)]
         ));
+
         this.pawnMoves = new EnumMap<Colors, long[]>(Map.of(
             Colors.WHITE, new long[holder.getSize(Size.BOARD_SIZE)],
             Colors.BLACK, new long[holder.getSize(Size.BOARD_SIZE)]
         ));
+        
         this.kingMoves = new long[holder.getSize(Size.BOARD_SIZE)];
         this.knightMoves = new long[holder.getSize(Size.BOARD_SIZE)];
-        generateMoves();
+        generateMoves(holder);
     }
 
-    private void generateMoves() {
+    private void generateMoves(Holder holder) {
         long attackBb;
         long whitePawnAttack;
         long blackPawnAttack;
@@ -81,14 +82,20 @@ public class Rays {
             pawnMoves.get(Colors.WHITE)[square] = whitePawnAttack;
             pawnMoves.get(Colors.BLACK)[square] = blackPawnAttack;
             // Sliding (Queen, rooks, bishop).
+            // Orthogonal
             slidingMoves.get(Directions.SOUTH)[square] = popFirst(holder.getFile(Files.FILE_A)) << square;
             slidingMoves.get(Directions.NORTH)[square] =  popLast(holder.getFile(Files.FILE_H)) >>> (BITS_OFFSET - square);
             slidingMoves.get(Directions.EAST)[square] = 2 * ((Holder.ONE << (square | 7)) - (Holder.ONE << square));
             slidingMoves.get(Directions.WEST)[square] = (Holder.ONE << square) - (Holder.ONE << (square & 56)); 
-            slidingMoves.get(Directions.SOUTH_WEST)[square] = westN(popFirst(holder.getAntiDiag(AntiDiagonals.DIAG_7)), 7 - col(square)) << (row(square) * 8);
-            slidingMoves.get(Directions.SOUTH_EAST)[square] = eastN(popFirst(holder.getDiag(Diagonals.DIAG_7)), col(square)) << (row(square) * 8);
-            slidingMoves.get(Directions.NORTH_WEST)[square] = westN(popLast(holder.getDiag(Diagonals.DIAG_7)), 7 - col(square)) >>> ((7 - row(square)) * 8);
-            slidingMoves.get(Directions.NORTH_EAST)[square] = eastN(popLast(holder.getAntiDiag(AntiDiagonals.DIAG_7)), col(square)) >>> ((7 - row(square)) * 8);
+            // Diagonal
+            slidingMoves.get(Directions.SOUTH_WEST)[square] = westN(popFirst(holder.getAntiDiag(AntiDiagonals.DIAG_7)), 
+                7 - col(square), holder.getFile(Files.FILE_H)) << (row(square) * 8);
+            slidingMoves.get(Directions.SOUTH_EAST)[square] = eastN(popFirst(holder.getDiag(Diagonals.DIAG_7)),
+                col(square), holder.getFile(Files.FILE_A)) << (row(square) * 8);
+            slidingMoves.get(Directions.NORTH_WEST)[square] = westN(popLast(holder.getDiag(Diagonals.DIAG_7)),
+                7 - col(square), holder.getFile(Files.FILE_H)) >>> ((7 - row(square)) * 8);
+            slidingMoves.get(Directions.NORTH_EAST)[square] = eastN(popLast(holder.getAntiDiag(AntiDiagonals.DIAG_7)),
+                col(square), holder.getFile(Files.FILE_A)) >>> ((7 - row(square)) * 8);
         }
     }
 
@@ -114,18 +121,18 @@ public class Rays {
         return square % 8;
     }
 
-    private long eastN(long board, int n) {
+    private long eastN(long board, int n, long file) {
         long newBoard = board;
         for (int i = 0; i < n; i++) {
-            newBoard = ((newBoard << 1) & (~holder.getFile(Files.FILE_A)));
+            newBoard = ((newBoard << 1) & (~file));
         }
         return newBoard;
     }
 
-    private long westN(long board, int n) {
+    private long westN(long board, int n, long file) {
         long newBoard = board;
         for (int i = 0; i < n; i++) {
-            newBoard = ((newBoard >>> 1) & (~holder.getFile(Files.FILE_H)));
+            newBoard = ((newBoard >>> 1) & (~file));
         }
         return newBoard;
     }

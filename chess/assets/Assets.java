@@ -3,6 +3,8 @@ package assets;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.EnumMap;
+
 import javax.imageio.ImageIO;
 
 import board.constants.Colors;
@@ -18,25 +20,29 @@ public class Assets {
     //public BufferedImage back_button;
     //public BufferedImage marker;
     //public BufferedImage perft_button;
-    private BufferedImage[][] pieces;
+    private EnumMap<Colors, EnumMap<Pieces, BufferedImage>> piecesImg;
     //public BufferedImage[] arrows; //0-left, 1-right
 
-    private BufferedImage sheet;
-    
     public Assets(int width, int height) {
         init();
     }
     
     private void init() {
         String absPath = new File("").getAbsolutePath();
-        sheet = loadImage(absPath + "\\chess\\images\\sheet.png");
-        pieces = new BufferedImage[6][2];
-        int counter = 0;
-        for (BufferedImage[] bufferedImage : pieces) {
-            bufferedImage[Colors.WHITE.ordinal()] = crop(PIECE_WIDTH*counter, 0, PIECE_WIDTH, PIECE_HEIGHT);
-            bufferedImage[Colors.BLACK.ordinal()] = crop(PIECE_WIDTH*counter, PIECE_HEIGHT, PIECE_WIDTH, PIECE_HEIGHT);
-            counter++;
+        
+        // Load images of pieces.
+        BufferedImage piecesSheet = loadImage(absPath + "\\chess\\images\\sheet.png");
+        piecesImg = new EnumMap<>(Colors.class);
+        for (Colors color : Colors.values()) {
+            EnumMap<Pieces, BufferedImage> tmp = new EnumMap<>(Pieces.class);
+            for (Pieces piece : Pieces.values()) {
+                BufferedImage tmpImg = piecesSheet.getSubimage(PIECE_WIDTH*piece.ordinal(),
+                    (color == Colors.WHITE) ? 0:PIECE_HEIGHT, PIECE_WIDTH, PIECE_HEIGHT);
+                tmp.put(piece, tmpImg);
+            }
+            piecesImg.put(color, tmp);
         }
+    
         board = loadImage(absPath + "\\chess\\images\\chess_board_640_480.png");
         /*
         marker = loadImage(absPath + "\\chess\\img\\dot.png");
@@ -50,6 +56,7 @@ public class Assets {
         BOARD_WIDTH = board.getWidth();
         BOARD_HEIGHT = board.getHeight();
         */
+        System.out.println("Images loaded successfully");
     }
 
     /**
@@ -67,18 +74,6 @@ public class Assets {
         return null;
     }
 
-    /**
-     * 
-     * @param x
-     * @param y
-     * @param width
-     * @param height
-     * @return BufferedImage (subimage of sheet)
-     */
-    private BufferedImage crop(int x, int y, int width, int height) {
-        return sheet.getSubimage(x, y, width, height);
-    }
-
     // --------- Getters --------- 
 
     /**
@@ -88,7 +83,7 @@ public class Assets {
      * @return BufferedImage of given piece of given color
      */
     public BufferedImage getPieceImg(Pieces piece, Colors color) {
-        return pieces[piece.ordinal()][color.ordinal()];
+        return piecesImg.get(color).get(piece);
     }
     
     /**
