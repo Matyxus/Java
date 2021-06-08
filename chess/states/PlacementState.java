@@ -70,6 +70,7 @@ public class PlacementState extends State {
         }
     }
 
+    @Override
     public void render(Graphics g) {
         this.uiManager.render(g);
         // Render the selected piece.
@@ -79,17 +80,18 @@ public class PlacementState extends State {
                 handler.getMouseManager().getMouseY() - (handler.getAssets().PIECE_HEIGHT/2), // y
                 null); 
         }
-        
     }
 
     protected void addButtons() {
         
         for (Pieces piece : Pieces.values()) {
+            int x = handler.getAssets().getBoardWidth();
+            int y = handler.getAssets().PIECE_HEIGHT * piece.ordinal();
+            int width = handler.getAssets().PIECE_WIDTH;
+            int height = handler.getAssets().PIECE_HEIGHT;
+            BufferedImage pieceImg = handler.getAssets().getPieceImg(piece, Colors.WHITE);
             // White pieces.
-            UIImageButton button = new UIImageButton(handler.getAssets().getBoardWidth(),
-                handler.getAssets().PIECE_HEIGHT * piece.ordinal(), handler.getAssets().PIECE_WIDTH, 
-                handler.getAssets().PIECE_HEIGHT, handler.getAssets().getPieceImg(piece, Colors.WHITE), null) {
-
+            UIImageButton button = new UIImageButton(x, y, width, height, pieceImg, null) {
                 @Override
                 public void onClick() {
                     if (object != null) {
@@ -98,16 +100,14 @@ public class PlacementState extends State {
                         displayPiece = ((Pieces) object);
                         displayPieceColor = Colors.WHITE;
                     }
-                    
                 }
             };
             button.setObject(piece);
             this.uiManager.addObject(button);
             // Black pieces.
-            button = new UIImageButton(handler.getAssets().getBoardWidth()+handler.getAssets().PIECE_WIDTH,
-                handler.getAssets().PIECE_HEIGHT * piece.ordinal(), handler.getAssets().PIECE_WIDTH, 
-                handler.getAssets().PIECE_HEIGHT, handler.getAssets().getPieceImg(piece, Colors.BLACK), null) {
-
+            x += width; // Move black pieces next to white pieces
+            pieceImg = handler.getAssets().getPieceImg(piece, Colors.BLACK);
+            button = new UIImageButton(x, y, width, height, pieceImg, null) {
                 @Override
                 public void onClick() {
                     if (object != null) {
