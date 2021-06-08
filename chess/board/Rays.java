@@ -38,14 +38,14 @@ public class Rays {
         ));
 
         this.slidingMoves = new EnumMap<Directions, long[]>(Map.of(
-            Directions.SOUTH,      new long[holder.getSize(Size.ROWS)],
-            Directions.NORTH,      new long[holder.getSize(Size.ROWS)],
-            Directions.EAST,       new long[holder.getSize(Size.ROWS)],
-            Directions.WEST,       new long[holder.getSize(Size.ROWS)],
-            Directions.SOUTH_WEST, new long[holder.getSize(Size.ROWS)],
-            Directions.SOUTH_EAST, new long[holder.getSize(Size.ROWS)],
-            Directions.NORTH_WEST, new long[holder.getSize(Size.ROWS)],
-            Directions.NORTH_EAST, new long[holder.getSize(Size.ROWS)]
+            Directions.SOUTH,      new long[holder.getSize(Size.BOARD_SIZE)],
+            Directions.NORTH,      new long[holder.getSize(Size.BOARD_SIZE)],
+            Directions.EAST,       new long[holder.getSize(Size.BOARD_SIZE)],
+            Directions.WEST,       new long[holder.getSize(Size.BOARD_SIZE)],
+            Directions.SOUTH_WEST, new long[holder.getSize(Size.BOARD_SIZE)],
+            Directions.SOUTH_EAST, new long[holder.getSize(Size.BOARD_SIZE)],
+            Directions.NORTH_WEST, new long[holder.getSize(Size.BOARD_SIZE)],
+            Directions.NORTH_EAST, new long[holder.getSize(Size.BOARD_SIZE)]
         ));
 
         this.pawnMoves = new EnumMap<Colors, long[]>(Map.of(
@@ -160,9 +160,9 @@ public class Rays {
     public long getDirection(Directions direction, int square, long blockers) {
         long tmp = slidingMoves.get(direction)[square];
         if ((tmp & blockers) != 0) {
-            int blockerIndex = (withMask.get(direction)) ? 
+            int blockerIndex = ((withMask.get(direction)) ? 
                 (BITS_OFFSET-Long.numberOfLeadingZeros(tmp & blockers)) : 
-                Long.numberOfTrailingZeros(tmp & blockers);
+                Long.numberOfTrailingZeros(tmp & blockers));
             tmp &= ~slidingMoves.get(direction)[blockerIndex];
         }
         return tmp;

@@ -37,7 +37,7 @@ public class Player {
      * @param square at which piece is placed
      */
     public void addPiece(int piece, int square) {
-        System.out.println("Adding " + Pieces.values()[piece] + " color: " + Colors.values()[color] + " on square: " + square);
+        System.out.println("Adding " + Colors.values()[color] + " " + Pieces.values()[piece] + " on square: " + square);
         placedPieces.put(square, new Square(piece, color)); // Color could be redundant in Square.
         long targetSquare = Holder.ONE << square;
         allPieces |= targetSquare;
@@ -50,7 +50,7 @@ public class Player {
      */
     public void removePiece(int square) {
         int removedPiece = placedPieces.remove(square).getPiece();
-        System.out.println("Removing " + Pieces.values()[removedPiece] + " color: " + Colors.values()[color] + " from square: " + square);
+        System.out.println("Removing " + Colors.values()[color] + " " + Pieces.values()[removedPiece] + " from square: " + square);
         long targetSquare = Holder.ONE << square;
         allPieces ^= targetSquare;
         individualPieces[removedPiece] ^= targetSquare;

@@ -40,9 +40,9 @@ public class PlacementState extends State {
                 if (display || dragged) { 
                     // Pawn cant be placed on 0th or 7th row.
                     if (!(displayPiece == Pieces.PAWN && (y == 0 || y == 7))) { 
+                        // Put down picked piece from board, stop showing its img.
                         handler.getGameBoard().placePiece(displayPiece.ordinal(), 
                             displayPieceColor.ordinal(), squareIndex);
-                        // Put down picked piece from board, stop showing its img.
                         dragged = false;
                     }
                 // Pickup piece and place it.
