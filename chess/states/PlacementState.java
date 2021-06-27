@@ -4,7 +4,7 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
 import main.Handler;
-import board.Square;
+import board.Spot;
 import board.constants.Colors;
 import board.constants.Pieces;
 import managers.UIManager;
@@ -18,8 +18,8 @@ public class PlacementState extends State {
     private boolean display = false; // Clicked on button containing piece.
     private boolean dragged = false; // Clicked on piece on board.
 
-    private Pieces displayPiece;
-    private Colors displayPieceColor;
+    private int displayPiece;
+    private int displayPieceColor;
     
     public PlacementState(Handler handler) {
         super(handler);
@@ -41,17 +41,17 @@ public class PlacementState extends State {
                     // Pawn cant be placed on 0th or 7th row.
                     if (!(displayPiece == Pieces.PAWN && (y == 0 || y == 7))) { 
                         // Put down picked piece from board, stop showing its img.
-                        handler.getGameBoard().placePiece(displayPiece.ordinal(), 
-                            displayPieceColor.ordinal(), squareIndex);
+                        handler.getGameBoard().placePiece(displayPiece, 
+                            displayPieceColor, squareIndex);
                         dragged = false;
                     }
                 // Pickup piece and place it.
                 } else if (handler.getGameBoard().containsPiece(squareIndex) != null) {
-                    Square target = handler.getGameBoard().containsPiece(squareIndex);
-                    displayPiece = Pieces.values()[target.getPiece()];
-                    displayPieceColor = Colors.values()[target.getColor()];
+                    Spot target = handler.getGameBoard().containsPiece(squareIndex);
+                    displayPiece = target.getPiece();
+                    displayPieceColor = target.getColor();
                     img = handler.getAssets().getPieceImg(displayPiece, displayPieceColor);
-                    handler.getGameBoard().removePiece(displayPieceColor.ordinal(), squareIndex);
+                    handler.getGameBoard().removePiece(displayPieceColor, squareIndex);
                     dragged = true;
                 }
             } else {
@@ -64,7 +64,7 @@ public class PlacementState extends State {
             if (display || dragged) {
                 display = dragged = false;
             } else if (handler.getGameBoard().containsPiece(squareIndex) != null) {
-                Square target = handler.getGameBoard().containsPiece(squareIndex);
+                Spot target = handler.getGameBoard().containsPiece(squareIndex);
                 handler.getGameBoard().removePiece(target.getColor(), squareIndex);
             }
         }
@@ -84,9 +84,9 @@ public class PlacementState extends State {
 
     protected void addButtons() {
         
-        for (Pieces piece : Pieces.values()) {
+        for (int piece : Pieces.getPieces()) {
             int x = handler.getAssets().getBoardWidth();
-            int y = handler.getAssets().PIECE_HEIGHT * piece.ordinal();
+            int y = handler.getAssets().PIECE_HEIGHT * piece;
             int width = handler.getAssets().PIECE_WIDTH;
             int height = handler.getAssets().PIECE_HEIGHT;
             BufferedImage pieceImg = handler.getAssets().getPieceImg(piece, Colors.WHITE);
@@ -97,7 +97,7 @@ public class PlacementState extends State {
                     if (object != null) {
                         display = true;
                         img = getImage(0);
-                        displayPiece = ((Pieces) object);
+                        displayPiece = piece;
                         displayPieceColor = Colors.WHITE;
                     }
                 }
@@ -113,7 +113,7 @@ public class PlacementState extends State {
                     if (object != null) {
                         display = true;
                         img = getImage(0);
-                        displayPiece = ((Pieces) object);
+                        displayPiece = piece;
                         displayPieceColor = Colors.BLACK;
                     }
                 }

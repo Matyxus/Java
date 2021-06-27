@@ -15,9 +15,8 @@ import javax.imageio.ImageIO;
 */
 import java.util.HashMap;
 
-import board.Square;
+import board.Spot;
 import board.constants.Colors;
-import board.constants.Pieces;
 
 
 public class GraphicsManager {
@@ -45,15 +44,15 @@ public class GraphicsManager {
      */
     private void renderPieces(Graphics g) {
         // White pieces.
-        HashMap<Integer, Square> curr = handler.getGameBoard().getPlayers(Colors.WHITE).getPlacedPieces();
+        HashMap<Integer, Spot> curr = handler.getGameBoard().getWhitePieces();
         curr.forEach((index, square) -> {
-            g.drawImage(handler.getAssets().getPieceImg(Pieces.values()[square.getPiece()], Colors.WHITE),
+            g.drawImage(handler.getAssets().getPieceImg(square.getPiece(), Colors.WHITE),
             handler.getAssets().PIECE_WIDTH*(index%8), handler.getAssets().PIECE_HEIGHT*(index/8), null);
         });
         // Black pieces.
-        curr = handler.getGameBoard().getPlayers(Colors.BLACK).getPlacedPieces();
+        curr = handler.getGameBoard().getBlackPieces();
         curr.forEach((index, square) -> {
-            g.drawImage(handler.getAssets().getPieceImg(Pieces.values()[square.getPiece()], Colors.BLACK),
+            g.drawImage(handler.getAssets().getPieceImg(square.getPiece(), Colors.BLACK),
             handler.getAssets().PIECE_WIDTH*(index%8), handler.getAssets().PIECE_HEIGHT*(index/8), null);
         });
     }

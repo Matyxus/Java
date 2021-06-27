@@ -5,15 +5,15 @@ import board.constants.Files;
 import board.constants.Ranks;
 import board.constants.Size;
 
-//https://www.chessprogramming.org/Magic_Bitboards -used Fancy
-//http://pradu.us/old/Nov27_2008/Buzz/research/magic/Bitboards.pdf
-//https://www.chessprogramming.org/index.php?title=Looking_for_Magics
-//https://www.chessprogramming.org/Best_Magics_so_far
-//magics found in array generated using Pradyumna Kannan (C++) code and (C)code from "Looking_for_Magics" (more in readMe).
-public class Magic {
-    private final Rays rays;
-    private final Holder holder;
+// https://www.chessprogramming.org/Magic_Bitboards -used Fancy
+// http://pradu.us/old/Nov27_2008/Buzz/research/magic/Bitboards.pdf
+// https://www.chessprogramming.org/index.php?title=Looking_for_Magics
+// https://www.chessprogramming.org/Best_Magics_so_far
+// magics found in array generated using Pradyumna Kannan (C++) code and (C)code from "Looking_for_Magics"
 
+public class TrueMagic {
+    private final Rays rays;
+    
     private final long[] rookMagics = { // 4 * 16 = 64
         0xa180022080400230L, 0x40100040022000L,   0x80088020001002L,   0x80080280841000L,
         0x4200042010460008L, 0x4800a0003040080L,  0x400110082041008L,  0x8000a041000880L,
@@ -52,9 +52,9 @@ public class Magic {
         0x1000042304105L,    0x10008830412a00L,   0x2520081090008908L, 0x40102000a0a60140L
     };
     
-    //Structures holding legal moves, magic number, mask, bit-shift
-    private final Struct[] rookStructs;
-    private final Struct[] bishopStructs;
+    // Structures holding legal moves, magic number, mask, bit-shift
+    private final Struct[] rookStructs = new Struct[Size.BOARD_SIZE];
+    private final Struct[] bishopStructs = new Struct[Size.BOARD_SIZE];
     
     // Long.Bitcount(rookMask[square])
     private final int[] rookBits = {
@@ -67,7 +67,6 @@ public class Magic {
         11, 10, 10, 10, 10, 10, 10, 11,
         12, 11, 11, 11, 11, 11, 11, 12
     };
-
     // Long.Bitcount(bishopMask[square])
     private final int[] bishopBits = {
         6, 5, 5, 5, 5, 5, 5, 6,
@@ -80,11 +79,8 @@ public class Magic {
         6, 5, 5, 5, 5, 5, 5, 6
     };
 
-    public Magic(Rays rays, Holder holder) {
+    public TrueMagic(Rays rays) {
         this.rays = rays;
-        this.holder = holder;
-        rookStructs = new Struct[holder.getSize(Size.BOARD_SIZE)];
-        bishopStructs = new Struct[holder.getSize(Size.BOARD_SIZE)];
         fillOptimalBishop();
         fillOptimalRook();
         init();
@@ -95,81 +91,87 @@ public class Magic {
     }
 
     /**
-     * For position on empty board creates rook moves, removes edges.
+     * @param square where rook is
+     * @return legal moves on emptyboard (without edges)
      */
-    private long rookMask(int square) { // moves on emptyboard (without edge squares)
+    private long rookMask(int square) {
         long south = rays.getRay(Directions.SOUTH, square);
         long north = rays.getRay(Directions.NORTH, square);
         long east = rays.getRay(Directions.EAST, square);
         long west = rays.getRay(Directions.WEST, square);
         // Remove edges
-        south ^= (south & holder.getRank(Ranks.RANK_8));
-        north ^= (north & holder.getRank(Ranks.RANK_1));
-        east ^= (east & holder.getFile(Files.FILE_H));
-        west ^= (west & holder.getFile(Files.FILE_A));
-        // Combine to create resulting moves
-        return (south | north | east | west);
+        south ^= (south & Ranks.RANK_8);
+        north ^= (north & Ranks.RANK_1);
+        east ^= (east & Files.FILE_H);
+        west ^= (west & Files.FILE_A);
+        return (south | north | east | west);    
 	}
 
     /**
-     * For position on empty board creates bishop moves, removes edges.
+     * @param square where bishop is
+     * @return legal moves on emptyboard (without edges)
      */
 	private long bishopMask(int square) { 
-        final long blockers = Holder.ZERO; // Empty board
-        final long edgeSquares = ( // Edges
-            holder.getFile(Files.FILE_A) | 
-            holder.getFile(Files.FILE_H) | 
-            holder.getRank(Ranks.RANK_1) | 
-            holder.getRank(Ranks.RANK_8)
+        final long edgeSquares = (Files.FILE_A | Files.FILE_H | Ranks.RANK_1 | Ranks.RANK_8);
+        return (
+            (rays.getRay(Directions.NORTH_EAST, square) | rays.getRay(Directions.NORTH_WEST, square)  |
+             rays.getRay(Directions.SOUTH_EAST, square) | rays.getRay(Directions.SOUTH_WEST, square)) & 
+            ~edgeSquares
         );
-        return (Bishop(blockers, square) & ~(edgeSquares));
 	}
-
+    
     /**
-     * @param fromSquare current square
+     * @param square where rook is
      * @param allPieces on board
-     * @return legal moves of rook (allied pieces have to be removed)
+     * @return legal moves of rook (same colored pieces have to be removed)
      */
-    public long getRookMoves(final int fromSquare, final long allPieces) {
-		final Struct rook = rookStructs[fromSquare]; // pick the correct structure on given square
-		return rook.magicMoves[(int) ((allPieces & rook.movementMask) * rook.magic >>> rook.shift)]; // unHash index
+    public long getRookMoves(final int square, final long allPieces) {
+		final Struct rook = rookStructs[square]; // pick the correct structure on given square
+        // Unhash index
+		return rook.magicMoves[(int) ((allPieces & rook.movementMask) * rook.magic >>> rook.shift)]; 
 	}
 
     /**
-     * @param fromSquare current square
+     * @param square where bishop is
      * @param allPieces on board
-     * @return legal moves of rook (allied pieces have to be removed)
-     */ 
-	public long getBishopMoves(final int fromSquare, final long allPieces) {
-		final Struct bishop = bishopStructs[fromSquare]; // pick the correct structure on given square
-		return bishop.magicMoves[(int) ((allPieces & bishop.movementMask) * bishop.magic >>> bishop.shift)]; // unHash index
+     * @return legal moves of bishop (same colored pieces have to be removed)
+     */
+	public long getBishopMoves(final int square, final long allPieces) {
+		final Struct bishop = bishopStructs[square]; // pick the correct structure on given square
+        // Unhash index
+		return bishop.magicMoves[(int) ((allPieces & bishop.movementMask) * bishop.magic >>> bishop.shift)]; 
     }
-
+    
     /**
-     * Initializes structures with magic number, bit-shift, movement mask
+     * Initializes Bishop/Rook structures with correct magic numbers, bit-shifts, masks
      */
     private void init() {
-        for (int square = 0; square < holder.getSize(Size.BOARD_SIZE); square++) {
-			rookStructs[square] = new Struct(rookMagics[square], 64-rookBits[square], rookMask(square));
-            bishopStructs[square] = new Struct(bishopMagics[square], 64-bishopBits[square], bishopMask(square));
+        for (int square = 0; square < Size.BOARD_SIZE; square++) {
+			rookStructs[square] = new Struct(rookMagics[square], Long.SIZE - rookBits[square], rookMask(square));
+            bishopStructs[square] = new Struct(bishopMagics[square], Long.SIZE  - bishopBits[square], bishopMask(square));
 		}
     }
 
-    // create all possible boards with all possible pieces location (without hashing = +/- 147.57 exabytes))
-    // removing bits from (bishop/rook)Masks until empty -> all possible boards on given square
+    /**
+     * @param magics strucutres of either rook or bishop
+     * @return all possible board variations
+     */
     private long[][] generateBoards(Struct[] magics) {
-		long[][] occ = new long[holder.getSize(Size.BOARD_SIZE)][];//init 64 squares
-		for (int square = 0; square < holder.getSize(Size.BOARD_SIZE); square++) { // iter possible location of piece (64 = whole board)
-			int allVariations = 1 << Long.bitCount(magics[square].movementMask);//num of all possible boards
-            occ[square] = new long[allVariations];//almost minimal number of indexes needed to store all moves
-            // iter over the all possible variations
+        // Boards for all squares where piece could be
+		long[][] occ = new long[Size.BOARD_SIZE][];
+        // Iterate over all possible location of piece on board
+		for (int square = 0; square < Size.BOARD_SIZE; square++) { 
+            // Number of all possible boards
+			int allVariations = 1 << Long.bitCount(magics[square].movementMask); 
+            // Allocate all boards
+            occ[square] = new long[allVariations];
+            // Iterate over the all possible variations
 			for (int variationIndex = 1; variationIndex < allVariations; variationIndex++) {
-                long currentMask = magics[square].movementMask; //current movementMask
-                // another possibility is int x = Long.numberOfTrailingZeros(currentMask), long loc = 0b1L<<x (currentMask XOR= loc))
-                // if (loc & variationIndex ) != 0, occ[square][variationIndex] |= loc 
-                for (int i = 0; i < 32 - Integer.numberOfLeadingZeros(variationIndex); i++) { // 32 = max number of bits in int
+                long currentMask = magics[square].movementMask; // Current movementMask
+                // Remove moves from board to generate all variations
+                for (int i = 0; i < (Integer.SIZE - Integer.numberOfLeadingZeros(variationIndex)); i++) {
 					if (((1 << i) & variationIndex) != 0) { // until board is empty
-						occ[square][variationIndex] |= Long.lowestOneBit(currentMask);// popped bit
+						occ[square][variationIndex] |= Long.lowestOneBit(currentMask); // popped bit
 					}
 					currentMask &= currentMask - 1; // remove first bit of number (101)->(001)
 				}
@@ -178,23 +180,32 @@ public class Magic {
 		return occ;
     }
 
-    // create legal moves on artificially created boards for rook, including edgeSquares
+    /**
+     * @param rookBoards all possible moves for rook
+     */
     private void generateAllRookMoves(long[][] rookBoards) {
-		for (int square = 0; square < holder.getSize(Size.BOARD_SIZE); square++) { // for all possible squares on board
-			rookStructs[square].magicMoves = new long[rookBoards[square].length];//copy size
-            for (int variationIndex = 0; variationIndex < rookBoards[square].length; variationIndex++) {//for all boards
-                // hash
+        // For all squares on board
+		for (int square = 0; square < Size.BOARD_SIZE; square++) {
+			rookStructs[square].magicMoves = new long[rookBoards[square].length]; // Copy size
+            // Calculate hash for all boards
+            for (int variationIndex = 0; variationIndex < rookBoards[square].length; variationIndex++) {
+                // Hash
 				int key = (int) ((rookBoards[square][variationIndex] * rookStructs[square].magic) >>> rookStructs[square].shift);
-				rookStructs[square].magicMoves[key] = Rook(rookBoards[square][variationIndex], square); // store the moves
+				rookStructs[square].magicMoves[key] = Rook(rookBoards[square][variationIndex], square);
 			}
 		}
     }
 
-    // create legal moves on artificially created boards for bishop, including edgeSquares
+    /**
+     * @param bishopBoards all possible moves for bishop
+     */
     private void generateAllBishopMoves(long[][] bishopBoards) {
-		for (int square = 0; square < holder.getSize(Size.BOARD_SIZE); square++) {// for all possible squares on board
-			bishopStructs[square].magicMoves = new long[bishopBoards[square].length];//copy size
-			for (int variationIndex = 0; variationIndex < bishopBoards[square].length; variationIndex++) {//for all boards
+        // For all squares on board
+		for (int square = 0; square < Size.BOARD_SIZE; square++) {
+			bishopStructs[square].magicMoves = new long[bishopBoards[square].length]; // Copy size
+            // Calculate hash for all boards
+			for (int variationIndex = 0; variationIndex < bishopBoards[square].length; variationIndex++) {
+                // Hash
 				int key = (int) ((bishopBoards[square][variationIndex] * bishopStructs[square].magic) >>> bishopStructs[square].shift);
 				bishopStructs[square].magicMoves[key] = Bishop(bishopBoards[square][variationIndex], square);
 			}
@@ -202,38 +213,31 @@ public class Magic {
     }
 
     /**
-     * 
-     * @param blockers all pieces on board
-     * @param square current location
-     * @return pseudo-legal moves of bishop
+     * @param blockers pieces on board
+     * @param square where rook is
+     * @return moves for rook
      */
     private long Rook(long blockers, int square){
-        long moves = Holder.ZERO;
-        moves |= rays.getDirection(Directions.SOUTH, square, blockers);
-        moves |= rays.getDirection(Directions.NORTH, square, blockers);
-        moves |= rays.getDirection(Directions.WEST, square, blockers);
-        moves |= rays.getDirection(Directions.EAST, square, blockers);
+        long moves = Size.ZERO;
+        moves |= rays.South(square, blockers); 
+        moves |= rays.North(square, blockers);
+        moves |= rays.West(square, blockers);
+        moves |= rays.East(square, blockers);
         return moves;
     }
 
-    /**
-     * @param blockers all pieces on board
-     * @param square current location
-     * @return pseudo-legal moves of bishop
-     */
+    //Bishop legal moves with "classical" approach
     private long Bishop(long blockers, int square) {
-        long moves = Holder.ZERO;
-        moves |= rays.getDirection(Directions.SOUTH_EAST, square, blockers);
-        moves |= rays.getDirection(Directions.SOUTH_WEST, square, blockers);
-        moves |= rays.getDirection(Directions.NORTH_EAST, square, blockers);
-        moves |= rays.getDirection(Directions.NORTH_WEST, square, blockers);
+        long moves = Size.ZERO;
+        moves |= rays.southEast(square, blockers);
+        moves |= rays.southWest(square, blockers);
+        moves |= rays.northEast(square, blockers);
+        moves |= rays.northWest(square, blockers);
         return moves;
     }
 
-    /**
-     * Optimal magic numbers for rook, and their shift.
-     */
-    private final void fillOptimalRook() {
+    // Best magic numbers for rook and required bits for shift
+    private final void fillOptimalRook(){
         rookMagics[48] = 0x48FFFE99FECFAA00L;
         rookBits[48] = 10; //48 = 0x48FFFE99FECFAA00 10
         rookMagics[49] = 0x48FFFE99FECFAA00L;
@@ -265,11 +269,8 @@ public class Magic {
         rookMagics[63] = 0x7645FFFECBFEA79EL;
         rookBits[63] = 11; //63 = 0x7645FFFECBFEA79E 11
     }
-
-    /**
-     * Optimal magic numbers for bishops and their shift.
-     */
-    private final void fillOptimalBishop() {
+    // Best magic numbers for bishops and required bits for shift
+    private final void fillOptimalBishop(){
         bishopMagics[0] = 0xffedf9fd7cfcffffL;
         bishopBits[0] = 5; //0 = 0xffedf9fd7cfcffff   5
         bishopMagics[1] = 0xfc0962854a77f576L;

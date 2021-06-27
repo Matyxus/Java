@@ -1,6 +1,6 @@
 package managers;
 import board.GameBoard;
-import board.Square;
+import board.Spot;
 //import components.FileChooser;
 import java.util.HashMap;
 
@@ -12,8 +12,8 @@ import java.awt.image.BufferedImage;
 
 public class FileManager {
     private final String absPath = new File("").getAbsolutePath() + "\\saves\\";
-    private HashMap<Integer, Square> blackPiecesMap;
-    private HashMap<Integer, Square> whitePiecesMap;
+    private HashMap<Integer, Spot> blackPiecesMap;
+    private HashMap<Integer, Spot> whitePiecesMap;
     private PrintWriter fstream;
     //private FileChooser fc = null;
 

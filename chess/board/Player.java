@@ -2,71 +2,65 @@ package board;
 
 import java.util.HashMap;
 
-import board.constants.Colors;
 import board.constants.Pieces;
+import board.constants.Size;
 
 public class Player {
 
-    private long allPieces;
+    private long allPieces = 0;
     private final long[] individualPieces;
     // HashMaps holding current placed pieces (key = index of square on board, topleft = 0)
-    private final HashMap<Integer, Square> placedPieces;
+    private final HashMap<Integer, Spot> placedPieces;
     private final int color;
     
-    public Player(Colors color) {
-        this.color = color.ordinal();
-        allPieces = Holder.ZERO;
-        individualPieces = new long[Pieces.values().length];
+    public Player(int color) {
+        this.color = color;
+        individualPieces = new long[Pieces.PIECE_COUNT];
         placedPieces = new HashMap<>();
+        resetVals();
     }
 
     /**
      * Resets bitboards to 0, and clears hashmap of pieces.
      */
     public void resetVals() {
-        allPieces = Holder.ZERO;
+        allPieces = 0;
         for (int i = 0; i < individualPieces.length; i++) {
-            individualPieces[i] = Holder.ZERO;
+            individualPieces[i] = 0;
         }
         placedPieces.clear();
     }
 
     /**
-     * 
      * @param piece to be placed
      * @param square at which piece is placed
      */
     public void addPiece(int piece, int square) {
-        System.out.println("Adding " + Colors.values()[color] + " " + Pieces.values()[piece] + " on square: " + square);
-        placedPieces.put(square, new Square(piece, color)); // Color could be redundant in Square.
-        long targetSquare = Holder.ONE << square;
+        placedPieces.put(square, new Spot(piece, color, square, false));
+        final long targetSquare = Size.ONE << square;
         allPieces |= targetSquare;
         individualPieces[piece] |= targetSquare;
     }
 
     /**
-     * 
      * @param square where piece is
      */
     public void removePiece(int square) {
-        int removedPiece = placedPieces.remove(square).getPiece();
-        System.out.println("Removing " + Colors.values()[color] + " " + Pieces.values()[removedPiece] + " from square: " + square);
-        long targetSquare = Holder.ONE << square;
+        final int removedPiece = (placedPieces.remove(square)).getPiece();
+        final long targetSquare = Size.ONE << square;
         allPieces ^= targetSquare;
         individualPieces[removedPiece] ^= targetSquare;
     }
 
     /**
-     * 
      * @param square where piece is
      * @return the square, or null if there is none
      */
-    public Square containsPiece(int square) {
+    public Spot containsPiece(int square) {
         return placedPieces.get(square);
     }
 
     /**
-     * 
      * @return bitboard of all pieces
      */
     public long getAllPieces() {
@@ -74,7 +68,6 @@ public class Player {
     }
 
     /**
-     * 
      * @param piece of given type
      * @return bitboards containing all pieces of given type
      */
@@ -83,22 +76,24 @@ public class Player {
     }
 
     /**
-     * 
-     * @return HashMap of all placed pieces of this players
-     * color
+     * @return HashMap of all placed pieces
      */
-    public HashMap<Integer, Square> getPlacedPieces() {
+    public HashMap<Integer, Spot> getPlacedPieces() {
         return placedPieces;
     }
 
     /**
-     * 
      * @return color of this player
      */
     public int getColor() {
         return color;
     }
 
-
+    /**
+     * @return the square king is currently on
+     */
+    public int getKingSquare() {
+        return Long.numberOfTrailingZeros(individualPieces[Pieces.KING]);
+    }
     
 }

@@ -1,8 +1,9 @@
 package board.constants;
 /**
- * To be used with .ordinal()
+ * Class holding values of colors assigned to players
  */
-public enum Colors {
-    WHITE,
-    BLACK;
+public class Colors {
+    public final static int WHITE       = 0;
+    public final static int BLACK       = 1;
+    public final static int COLOR_COUNT = 2;
 }

@@ -3,7 +3,7 @@ package assets;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.util.EnumMap;
+import java.util.HashMap;
 
 import javax.imageio.ImageIO;
 
@@ -20,7 +20,7 @@ public class Assets {
     //public BufferedImage back_button;
     //public BufferedImage marker;
     //public BufferedImage perft_button;
-    private EnumMap<Colors, EnumMap<Pieces, BufferedImage>> piecesImg;
+    private HashMap<Integer, HashMap<Integer, BufferedImage>> piecesImg;
     //public BufferedImage[] arrows; //0-left, 1-right
 
     public Assets(int width, int height) {
@@ -32,11 +32,11 @@ public class Assets {
         
         // Load images of pieces.
         BufferedImage piecesSheet = loadImage(absPath + "\\chess\\images\\sheet.png");
-        piecesImg = new EnumMap<>(Colors.class);
-        for (Colors color : Colors.values()) {
-            EnumMap<Pieces, BufferedImage> tmp = new EnumMap<>(Pieces.class);
-            for (Pieces piece : Pieces.values()) {
-                BufferedImage tmpImg = piecesSheet.getSubimage(PIECE_WIDTH*piece.ordinal(),
+        piecesImg = new HashMap<Integer, HashMap<Integer, BufferedImage>>();
+        for (int color = Colors.WHITE; color < Colors.COLOR_COUNT; color++) {
+            HashMap<Integer, BufferedImage> tmp = new HashMap<Integer, BufferedImage>();
+            for (int piece = Pieces.KING; piece < Pieces.PIECE_COUNT; piece++) {
+                BufferedImage tmpImg = piecesSheet.getSubimage(PIECE_WIDTH*piece,
                     (color == Colors.WHITE) ? 0:PIECE_HEIGHT, PIECE_WIDTH, PIECE_HEIGHT);
                 tmp.put(piece, tmpImg);
             }
@@ -82,7 +82,7 @@ public class Assets {
      * @param color color of chess piece
      * @return BufferedImage of given piece of given color
      */
-    public BufferedImage getPieceImg(Pieces piece, Colors color) {
+    public BufferedImage getPieceImg(Integer piece, int color) {
         return piecesImg.get(color).get(piece);
     }
     

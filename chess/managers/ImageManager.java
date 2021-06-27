@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 import board.constants.Colors;
-import board.constants.Pieces;
 
 public class ImageManager {
     // Chess board square dimensions
@@ -37,8 +36,8 @@ public class ImageManager {
         pieces = new BufferedImage[6][2];
         int counter = 0;
         for (BufferedImage[] bufferedImage : pieces) {
-            bufferedImage[Colors.WHITE.ordinal()] = crop(PIECE_WIDTH*counter, 0, PIECE_WIDTH, PIECE_HEIGHT);
-            bufferedImage[Colors.BLACK.ordinal()] = crop(PIECE_WIDTH*counter, PIECE_HEIGHT, PIECE_WIDTH, PIECE_HEIGHT);
+            bufferedImage[Colors.WHITE] = crop(PIECE_WIDTH*counter, 0, PIECE_WIDTH, PIECE_HEIGHT);
+            bufferedImage[Colors.BLACK] = crop(PIECE_WIDTH*counter, PIECE_HEIGHT, PIECE_WIDTH, PIECE_HEIGHT);
             counter++;
         }
         board = loadImage(absPath + "\\chess\\img\\chess_board_640_480.png");
@@ -88,8 +87,8 @@ public class ImageManager {
      * @param color of piece
      * @return BufferedImage of given piece.
      */
-    public BufferedImage getPieceImg(Pieces piece, Colors color) {
-        return pieces[piece.ordinal()][color.ordinal()];
+    public BufferedImage getPieceImg(int piece, int color) {
+        return pieces[piece][color];
     }
 
     /**
