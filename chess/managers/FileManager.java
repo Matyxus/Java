@@ -1,23 +1,28 @@
 package managers;
 import board.GameBoard;
 import board.Spot;
-//import components.FileChooser;
+import components.FileChooser;
+
 import java.util.HashMap;
-
 import javax.imageio.ImageIO;
-
 import java.io.File;
 import java.io.PrintWriter;
 import java.awt.image.BufferedImage;
 
 public class FileManager {
-    private final String absPath = new File("").getAbsolutePath() + "\\saves\\";
+    private final String absPath = new File("").getAbsolutePath() + "\\chess\\saves\\";
     private HashMap<Integer, Spot> blackPiecesMap;
     private HashMap<Integer, Spot> whitePiecesMap;
     private PrintWriter fstream;
-    //private FileChooser fc = null;
+    private FileChooser fc = null;
 
     public FileManager(){};
+
+    public void loadFile() {
+        fc = new FileChooser(absPath);
+        System.out.println(fc.getFileName());
+        fc = null;
+    }
     
     public void safeFile(String fileName, BufferedImage img, GameBoard board) {
         final String path = absPath+fileName;

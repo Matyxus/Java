@@ -62,11 +62,9 @@ public class Display {
             public void mousePressed(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
                     System.out.println("Clicked on save");
-                    /*
                     if (handler.getGameBoard() != null) {
                         handler.getGameBoard().saveGame();
                     }
-                    */
                 }
             }
         });
@@ -77,11 +75,9 @@ public class Display {
             public void mousePressed(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
                     System.out.println("Clicked on load");
-                    /*
                     if (handler.getGameBoard() != null) {
                         handler.getGameBoard().loadGame();
                     }
-                    */
                 }
             }
         });

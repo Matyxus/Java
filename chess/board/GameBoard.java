@@ -2,15 +2,19 @@ package board;
 import java.util.HashMap;
 
 import board.constants.Colors;
+import managers.FileManager;
 
 public class GameBoard {
     private final MoveGen moveGen;
+    private final FileManager fileManager;
     private int currentPlayer = Colors.WHITE;
+    
 
     private final Player[] players = {new Player(Colors.WHITE), new Player(Colors.BLACK)};
 
     public GameBoard() {
-        this.moveGen = new MoveGen(new Rays(), players);
+        moveGen = new MoveGen(new Rays(), players);
+        fileManager = new FileManager();
     }
 
     public void reset() {
@@ -18,6 +22,14 @@ public class GameBoard {
         for (Player player : players) {
             player.resetVals();
         }
+    }
+
+    public void loadGame() {
+        fileManager.loadFile();
+    }
+
+    public void saveGame() {
+        System.out.println("Saving not implemented");
     }
 
     /**
