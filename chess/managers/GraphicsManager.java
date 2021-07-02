@@ -88,8 +88,7 @@ public class GraphicsManager {
             BufferedImage.TYPE_INT_ARGB            // image type
         );
         Graphics bGr = bimage.createGraphics();
-        bGr.drawImage(handler.getAssets().getBoard(), 0, 0, null); // Render board
-        renderPieces(bGr); // Render pieces
+        render(bGr);
         bGr.dispose();
         return bimage;
     }

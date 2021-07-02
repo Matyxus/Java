@@ -13,6 +13,13 @@ public class GameBoard {
         this.moveGen = new MoveGen(new Rays(), players);
     }
 
+    public void reset() {
+        System.out.println("Deleting pieces");
+        for (Player player : players) {
+            player.resetVals();
+        }
+    }
+
     /**
      * @param piece to be added
      * @param color of piece

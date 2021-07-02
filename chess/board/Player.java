@@ -21,7 +21,7 @@ public class Player {
     }
 
     /**
-     * Resets bitboards to 0, and clears hashmap of pieces.
+     * Resets bitboards to 0, and clears hashmap of placed pieces
      */
     public void resetVals() {
         allPieces = 0;

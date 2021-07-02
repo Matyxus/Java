@@ -19,7 +19,7 @@ public class Assets {
     //public BufferedImage button_start, button_quit;
     //public BufferedImage back_button;
     //public BufferedImage marker;
-    //public BufferedImage perft_button;
+    private BufferedImage perft_button;
     private HashMap<Integer, HashMap<Integer, BufferedImage>> piecesImg;
     //public BufferedImage[] arrows; //0-left, 1-right
 
@@ -44,10 +44,10 @@ public class Assets {
         }
     
         board = loadImage(absPath + "\\chess\\images\\chess_board_640_480.png");
+        perft_button = loadImage(absPath + "\\chess\\images\\menuImages\\Perft_button.png");
         /*
         marker = loadImage(absPath + "\\chess\\img\\dot.png");
         //BUTTONS
-        perft_button = loadImage(absPath + "\\chess\\img\\menuImages\\Perft_button.png");
         button_start = loadImage(absPath + "\\chess\\img\\menuImages\\startButton.png");
         button_quit = loadImage(absPath + "\\chess\\img\\menuImages\\quitButton.png");
         back_button = loadImage(absPath + "\\chess\\img\\menuImages\\back_button.png");
@@ -75,6 +75,10 @@ public class Assets {
     }
 
     // --------- Getters --------- 
+
+    public BufferedImage getPerft_button() {
+        return perft_button;
+    }
 
     /**
      * 

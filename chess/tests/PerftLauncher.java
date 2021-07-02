@@ -1,4 +1,5 @@
-package board;
+package tests;
+import board.Perft;
 
 public class PerftLauncher {
 

@@ -2,12 +2,15 @@ package states;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 
 import main.Handler;
+import board.Fen;
 import board.Spot;
 import board.constants.Colors;
 import board.constants.Pieces;
 import managers.UIManager;
+import ui.PopUP;
 import ui.UIImageButton;
 
 public class PlacementState extends State {
@@ -55,7 +58,7 @@ public class PlacementState extends State {
                     dragged = true;
                 }
             } else {
-                // Cancle showing img.
+                // Stop showing img.
                 display = dragged = false;
             }
         }
@@ -75,10 +78,12 @@ public class PlacementState extends State {
         this.uiManager.render(g);
         // Render the selected piece.
         if (display || dragged) {
-            g.drawImage(img, 
+            g.drawImage(
+                img, 
                 handler.getMouseManager().getMouseX() - (handler.getAssets().PIECE_WIDTH/2),  // x
                 handler.getMouseManager().getMouseY() - (handler.getAssets().PIECE_HEIGHT/2), // y
-                null); 
+                null
+            ); 
         }
     }
 
@@ -122,21 +127,25 @@ public class PlacementState extends State {
             this.uiManager.addObject(button);
         }
 
-        /*
-        this.uiManager.addObject(new UIImageButton(Assets.BOARD_WIDTH, 360, 
-                2*Assets.PIECE_WIDTH, Assets.PIECE_HEIGHT, Assets.button_start, -1) {
+        // Fen button for testing purposes
+        this.uiManager.addObject(new UIImageButton(0, handler.getAssets().getBoardHeight(), 
+                160, 80, handler.getAssets().getPerft_button(), null) {
             @Override
             public void onClick() { // "play button"
-                if (handler.getGameBoard().canPlay()) {
-                    if (PopUps.gameSettingsPopUp()) {
-                        checkForModification();
-                        System.gc();
-                        handler.getGame().startGameState();
-                        State.setState(handler.getGame().gameState); 
-                    }  
+                String tmp = PopUP.Trial();
+                if (tmp != null && !tmp.isEmpty()) {
+                    Fen fen = new Fen();
+                    ArrayList<Spot> result = fen.interpret(tmp);
+                    if (result != null && !result.isEmpty()) {
+                        handler.getGameBoard().reset();
+                        result.forEach((spot) -> 
+                            handler.getGameBoard().addPiece(spot.getPiece(), spot.getColor(), spot.getSquare())
+                        );
+                    }
                 }
             }
         });
+        /*
         // this will be button to set to viewerState
         this.uiManager.addObject(new UIImageButton(Assets.BOARD_WIDTH, 420, 
                 2*Assets.PIECE_WIDTH,  Assets.PIECE_HEIGHT, Assets.button_quit, -1) {
