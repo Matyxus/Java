@@ -1,4 +1,5 @@
 package board;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import board.constants.Colors;
@@ -25,7 +26,14 @@ public class GameBoard {
     }
 
     public void loadGame() {
-        fileManager.loadFile();
+        ArrayList<Spot> pieces = fileManager.loadFile();
+        if (pieces != null && !pieces.isEmpty()) {
+            System.out.println("Loading Success");
+            reset();
+            pieces.forEach((spot) -> addPiece(
+                spot.getPiece(), spot.getColor(), spot.getSquare())
+            );
+        }
     }
 
     public void saveGame() {
@@ -48,15 +56,11 @@ public class GameBoard {
     public void removePiece(int color, int square) {
         players[color].removePiece(square);
     }
-    
-    public void updateWhite() {
-        moveGen.updatePiecesMoves(Colors.WHITE);
-    }
 
-    public void updateBlack() {
-        moveGen.updatePiecesMoves(Colors.BLACK);
+    public void updatePieces(int color) {
+        moveGen.updatePiecesMoves(color);
     }
-    
+     
     /**
      * @param square of piece
      * @return Spot if square contains a piece,
@@ -88,19 +92,21 @@ public class GameBoard {
         return removed;
     }
 
+    public Spot movePiece(int fromSquare, int toSquare, int color,  int piece) {
+        removePiece(color, fromSquare);
+        // Check if capture occurred
+        Spot removedSpot = players[((color+1) & 1)].containsPiece(toSquare);
+        if (removedSpot != null) { 
+            removePiece(removedSpot.getColor(), toSquare);
+        }
+        addPiece(piece, color, toSquare);
+        return removedSpot;
+    }
+
+    public HashMap<Integer, Spot> getPieces(int color) {
+        return players[color].getPlacedPieces();
+    }
     
-    public MoveGen getPieces() {
-        return this.moveGen;
-    }
-
-    public HashMap<Integer, Spot> getWhitePieces() {
-        return players[Colors.WHITE].getPlacedPieces();
-    }
-
-    public HashMap<Integer, Spot> getBlackPieces() {
-        return players[Colors.BLACK].getPlacedPieces();
-    }
-
     public Player getPlayer(int color) {
         return players[color];
     }
@@ -109,24 +115,8 @@ public class GameBoard {
         this.currentPlayer = currentPlayer;
     }
     
-    public Spot moveWhitePiece(int fromSquare, int toSquare, int piece) {
-        removePiece(Colors.WHITE, fromSquare);
-        Spot removedSpot = containsPiece(toSquare);
-        if (removedSpot != null) { 
-            removePiece(removedSpot.getColor(), toSquare);
-        }
-        addPiece(piece, Colors.WHITE, toSquare);
-        return removedSpot;
-    }
-
-    public Spot moveBlackPiece(int fromSquare, int toSquare, int piece) {
-        removePiece(Colors.BLACK, fromSquare);
-        Spot removedSpot = containsPiece(toSquare);
-        if (removedSpot != null) { 
-            removePiece(removedSpot.getColor(), toSquare);
-        }
-        addPiece(piece, Colors.BLACK, toSquare);
-        return removedSpot;
+    public int getCurrentPlayer() {
+        return currentPlayer;
     }
     
 }

@@ -10,9 +10,8 @@ import board.constants.Pieces;
 import board.constants.Size;
 
 public class Perft {
-    private GameBoard board;
+    private final GameBoard board;
     public static long nodes = 0;
-    private long[] pieceNodes = {0, 0, 0, 0, 0, 0};
     
     public Perft() {
         nodes = 0;
@@ -22,12 +21,8 @@ public class Perft {
     public boolean init(int depth, boolean hashing) {
         addAllPieces();
         long now = System.nanoTime();
-        perftWhite(depth);
+        perft(depth, Colors.WHITE);
         long after = System.nanoTime() - now;
-        for (int i = 0; i < pieceNodes.length; i++) {
-            System.out.println("Piece: " + i + " found moves: " + pieceNodes[i]);
-            nodes += pieceNodes[i];
-        }
         System.out.println("Found nodes: " + nodes);
         System.out.println("Took sec: " + after/1000000000);
         System.out.println("Took milisec: " + after/1000000);
@@ -36,18 +31,18 @@ public class Perft {
         return true;
     }
 
-    private void perftWhite(int depth){
-        board.updateWhite();
+    private void perft(int depth, int color) {
+        board.updatePieces(color);
         if (depth == 1) {
-            board.getWhitePieces().forEach((square, spot)-> { 
-                pieceNodes[spot.getPiece()]+=Long.bitCount(spot.getMoves());
-            });
-            //board.getWhitePieces().forEach((square, spot)->nodes+=Long.bitCount(spot.getMoves()));
+            board.getPieces(color).forEach((square, spot)->nodes+=Long.bitCount(spot.getMoves()));
             return;
         }
-        HashMap<Integer, Spot> moves = new HashMap<Integer, Spot>();
-        board.getWhitePieces().forEach((square, spot)->moves.put(square, new Spot(spot.getPiece(), Colors.WHITE, square, false)));
-        board.getWhitePieces().forEach((square, spot)->moves.get(square).setMoves(spot.getMoves()));
+        final HashMap<Integer, Spot> moves = new HashMap<Integer, Spot>();
+        board.getPieces(color).forEach((square, spot)-> {
+            final Spot temp = new Spot(spot.getPiece(), color, square, false);
+            temp.setMoves(spot.getMoves());
+            moves.put(square, temp);
+        });
         moves.forEach((square, spot)->{
             int piece = spot.getPiece();
             long move = spot.getMoves();
@@ -55,55 +50,21 @@ public class Perft {
             while (move != 0) {
                 result = Long.numberOfTrailingZeros(move);
                 move ^= (Size.ONE << result);
-                Spot capture = board.moveWhitePiece(square, result, piece);
-                perftBlack(depth-1);
-                UndoMoveWhite(piece, square, result);
+                Spot capture = board.movePiece(square, result, color, piece);
+                perft(depth-1, (color+1) & 1);
+                undoMove(piece, color, square, result);
                 if (capture != null) {
-                    board.addPiece(capture.getPiece(), Colors.BLACK, capture.getSquare());
+                    board.addPiece(capture.getPiece(), capture.getColor(), capture.getSquare());
                 }
             }
         });
     }
 
-    private void perftBlack(int depth){
-        board.updateBlack();
-        if (depth == 1) {
-            board.getBlackPieces().forEach((square, spot)-> { 
-                pieceNodes[spot.getPiece()]+=Long.bitCount(spot.getMoves());
-            });
-            //board.getBlackPieces().forEach((square, spot)->nodes+=Long.bitCount(spot.getMoves()));
-            return;
-        }
-        HashMap<Integer, Spot> moves = new HashMap<Integer, Spot>();
-        board.getBlackPieces().forEach((square, spot)->moves.put(square, new Spot(spot.getPiece(), Colors.BLACK, square, false)));
-        board.getBlackPieces().forEach((square, spot)->moves.get(square).setMoves(spot.getMoves()));
-        moves.forEach((square, spot)->{
-            int piece = spot.getPiece();
-            long move = spot.getMoves();
-            int result;
-            while (move != 0) {
-                result = Long.numberOfTrailingZeros(move);
-                move ^= (Size.ONE << result);
-                Spot capture = board.moveBlackPiece(square, result, piece);
-                perftWhite(depth-1);
-                UndoMoveBlack(piece, square, result);
-                if (capture != null){
-                    board.addPiece(capture.getPiece(), Colors.WHITE, capture.getSquare());
-                }
-            }
-        });
+    private void undoMove(int piece, int color, int toSquare, int fromSquare) {
+        board.removePiece(color, fromSquare);
+        board.addPiece(piece, color, toSquare);
     }
    
-    private void UndoMoveWhite(int piece, Integer toSquare, int fromSquare) {
-        board.removePiece(Colors.WHITE, fromSquare);
-        board.addPiece(piece, Colors.WHITE, toSquare);
-    }
-
-    private void UndoMoveBlack(int piece, Integer toSquare, int fromSquare) {
-        board.removePiece(Colors.BLACK, fromSquare);
-        board.addPiece(piece, Colors.BLACK, toSquare);
-    }
-    
     /**
      * @param bitBoard
      * Prints bit board as binary number, 8 numbers on single line

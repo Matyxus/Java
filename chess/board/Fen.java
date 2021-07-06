@@ -39,7 +39,6 @@ public class Fen {
      */
     public ArrayList<Spot> interpret(String fen) {
         String[] splitted = fen.split("/");
-        assert (splitted.length == 8);
         String[] info = splitted[splitted.length-1].split(" ");
         splitted[splitted.length-1] = info[0];
         /*
@@ -60,10 +59,14 @@ public class Fen {
                     square += Integer.parseInt(String.valueOf(ch));
                 } else {
                     System.out.println("Error, incorrect char in fen!: " + ch);
-                    System.out.println("Exiting ...");
                     return null;
                 }
             }
+        }
+        if (square != Size.BOARD_SIZE) {
+            System.out.println("Error, incorrect fen, sum of pieces and empty square is not 64!");
+            System.out.println("Squares: " + square);
+            return null;
         }
         // Info
         /*
@@ -78,10 +81,10 @@ public class Fen {
 
     public String createFen(GameBoard gameBoard) {
         ArrayList<Spot> pieces = new ArrayList<Spot>();
-        gameBoard.getBlackPieces().forEach((square, spot) ->
+        gameBoard.getPieces(Colors.BLACK).forEach((square, spot) ->
             pieces.add(spot)
         );
-        gameBoard.getWhitePieces().forEach((square, spot) ->
+        gameBoard.getPieces(Colors.WHITE).forEach((square, spot) ->
             pieces.add(spot)
         );
         Collections.sort(pieces, 
@@ -97,34 +100,32 @@ public class Fen {
             if (square != piece.getSquare()) {
                 int diff = (piece.getSquare()-square);
                 square = piece.getSquare();
-                // uz neco zapsano, doplnit na 8
+                // Something is already written, add part of 
+                // diff to have sum of 8 between "/.../"
                 if (counter != Size.ROWS && (counter - diff) <= 0) {
                     diff -= counter;
                     result += Integer.toString(counter);
                     result += "/";
                 }
-                // osmicky
+                // Eights
                 while (diff >= Size.ROWS) {
                     result += "8/";
                     diff -= Size.ROWS;
                 }
-                // reset counter
+                // Reset counter
                 if (result.length() > 0 && result.charAt(result.length()-1) == '/') {
                     counter = Size.ROWS;
                 }
-                // Zde jsem neco zapsal do novy kolonky
+                // Rest of the diff
                 if (diff > 0) {
                     result += Integer.toString(diff);
                 }
                 counter -= diff;
             }
-            // dojit sem pouze kdyz uz je / ve fenu
             // Add piece
             result += ch;
             square++;
             counter--;
-            //System.out.println("Current fen: " + result);
-            //System.out.println("Counter: " + counter);
             if (counter == 0) {
                 counter = Size.ROWS;
                 result += "/";

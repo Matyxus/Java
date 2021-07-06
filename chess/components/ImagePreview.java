@@ -15,6 +15,8 @@ import java.awt.geom.AffineTransform;
 
 public class ImagePreview extends JComponent implements PropertyChangeListener {
     private static final long serialVersionUID = 1L;
+    private final int width = 320;
+    private final int height = 240;
     ImageIcon thumbnail = null;
     File file = null;
 
@@ -22,7 +24,7 @@ public class ImagePreview extends JComponent implements PropertyChangeListener {
      * @param fc current active FileChooser
      */
     public ImagePreview(JFileChooser fc) {
-        setPreferredSize(new Dimension(320, 240));
+        setPreferredSize(new Dimension(width, height));
         fc.addPropertyChangeListener(this);
     }
 
@@ -34,14 +36,14 @@ public class ImagePreview extends JComponent implements PropertyChangeListener {
             thumbnail = null;
             return;
         }
-
         ImageIcon tmpIcon = new ImageIcon(file.getPath());
         if (tmpIcon != null) {
-            if (tmpIcon.getIconWidth() > 320) {
+            // Miniaturize image
+            if (tmpIcon.getIconWidth() > width || tmpIcon.getIconHeight() > height) {
                 Image img = tmpIcon.getImage();
                 BufferedImage buffer = toBufferedImage(img);
-                thumbnail = new ImageIcon(scale(buffer, BufferedImage.TYPE_INT_ARGB, 320, 240, 0.5, 0.5));
-            } else { // no need to miniaturize
+                thumbnail = new ImageIcon(scale(buffer, BufferedImage.TYPE_INT_ARGB, width, height, 0.5, 0.5));
+            } else {
                 thumbnail = tmpIcon;
             }
         }

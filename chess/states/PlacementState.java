@@ -2,21 +2,18 @@ package states;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 
 import main.Handler;
-import board.Fen;
 import board.Spot;
 import board.constants.Colors;
 import board.constants.Pieces;
 import managers.UIManager;
-import ui.PopUP;
 import ui.UIImageButton;
 
 public class PlacementState extends State {
 
     private final UIManager uiManager;
-    private BufferedImage img;
+    private BufferedImage pieceImage;
 
     private boolean display = false; // Clicked on button containing piece.
     private boolean dragged = false; // Clicked on piece on board.
@@ -26,6 +23,7 @@ public class PlacementState extends State {
     
     public PlacementState(Handler handler) {
         super(handler);
+        System.out.println("Initializing PlacementState");
         uiManager = new UIManager();
         handler.getMouseManager().setUiManager(uiManager);
         addButtons();
@@ -53,7 +51,7 @@ public class PlacementState extends State {
                     Spot target = handler.getGameBoard().containsPiece(squareIndex);
                     displayPiece = target.getPiece();
                     displayPieceColor = target.getColor();
-                    img = handler.getAssets().getPieceImg(displayPiece, displayPieceColor);
+                    pieceImage = handler.getAssets().getPieceImg(displayPiece, displayPieceColor);
                     handler.getGameBoard().removePiece(displayPieceColor, squareIndex);
                     dragged = true;
                 }
@@ -62,7 +60,7 @@ public class PlacementState extends State {
                 display = dragged = false;
             }
         }
-        // Right click as removal of pieces on bord or to stop draggin piece.
+        // Right click as removal of pieces on bord or to stop dragging piece.
         if (handler.getMouseManager().rightPressed()) {
             if (display || dragged) {
                 display = dragged = false;
@@ -79,7 +77,7 @@ public class PlacementState extends State {
         // Render the selected piece.
         if (display || dragged) {
             g.drawImage(
-                img, 
+                pieceImage, 
                 handler.getMouseManager().getMouseX() - (handler.getAssets().PIECE_WIDTH/2),  // x
                 handler.getMouseManager().getMouseY() - (handler.getAssets().PIECE_HEIGHT/2), // y
                 null
@@ -87,8 +85,8 @@ public class PlacementState extends State {
         }
     }
 
+    @Override
     protected void addButtons() {
-        
         for (int piece : Pieces.getPieces()) {
             int x = handler.getAssets().getBoardWidth();
             int y = handler.getAssets().PIECE_HEIGHT * piece;
@@ -101,7 +99,7 @@ public class PlacementState extends State {
                 public void onClick() {
                     if (object != null) {
                         display = true;
-                        img = getImage(0);
+                        pieceImage = getImage(0);
                         displayPiece = piece;
                         displayPieceColor = Colors.WHITE;
                     }
@@ -117,7 +115,7 @@ public class PlacementState extends State {
                 public void onClick() {
                     if (object != null) {
                         display = true;
-                        img = getImage(0);
+                        pieceImage = getImage(0);
                         displayPiece = piece;
                         displayPieceColor = Colors.BLACK;
                     }
@@ -127,22 +125,13 @@ public class PlacementState extends State {
             this.uiManager.addObject(button);
         }
 
-        // Fen button for testing purposes
+        // Button to switch to GameState, for testing purposes
         this.uiManager.addObject(new UIImageButton(0, handler.getAssets().getBoardHeight(), 
                 160, 80, handler.getAssets().getPerft_button(), null) {
             @Override
-            public void onClick() { // "play button"
-                String tmp = PopUP.Trial();
-                if (tmp != null && !tmp.isEmpty()) {
-                    Fen fen = new Fen();
-                    ArrayList<Spot> result = fen.interpret(tmp);
-                    if (result != null && !result.isEmpty()) {
-                        handler.getGameBoard().reset();
-                        result.forEach((spot) -> 
-                            handler.getGameBoard().addPiece(spot.getPiece(), spot.getColor(), spot.getSquare())
-                        );
-                    }
-                }
+            public void onClick() {
+                handler.getGameBoard().updatePieces(handler.getGameBoard().getCurrentPlayer());
+                State.setState(new GameState(handler));
             }
         });
         /*

@@ -24,6 +24,11 @@ public abstract class State {
     public abstract void update();
 
     /**
+     * Adds buttons specific to each state
+     */
+    protected abstract void addButtons();
+
+    /**
      * @param state to be set
      */
     public static void setState(State state){

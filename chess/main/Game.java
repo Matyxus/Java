@@ -6,13 +6,9 @@ import java.awt.Graphics;
 import states.PlacementState;
 import states.State;
 import managers.GraphicsManager;
-/*
-import states.GameState;
-import states.ReplayState;
-*/
 
 public class Game {
-    private int width, height;
+    private final int width, height;
     private boolean running = false;
     // Screen
     private BufferStrategy bs;
@@ -79,11 +75,9 @@ public class Game {
             now = System.nanoTime();
             // Check if input happened.
             if (handler.getMouseManager().leftPressed() || handler.getMouseManager().rightPressed()) {
-                System.out.println("Clicked on coord: " + handler.getMouseManager().getMouseX() + "  " +
-                    handler.getMouseManager().getMouseY());
                 update();
             }
-            //necessary, game loop is too fast, reset mouse buttons
+            // Necessary, game loop is too fast, reset mouse buttons
             handler.getMouseManager().setLeftClick(false);
             handler.getMouseManager().setRightClick(false);
             // Calculate if previous waiting was correct.

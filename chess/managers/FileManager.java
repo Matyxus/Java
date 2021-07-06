@@ -1,27 +1,41 @@
 package managers;
+import board.Fen;
 import board.GameBoard;
 import board.Spot;
 import components.FileChooser;
 
-import java.util.HashMap;
 import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.awt.image.BufferedImage;
+import javax.swing.UIManager;
 
 public class FileManager {
     private final String absPath = new File("").getAbsolutePath() + "\\chess\\saves\\";
-    private HashMap<Integer, Spot> blackPiecesMap;
-    private HashMap<Integer, Spot> whitePiecesMap;
+    private final Fen fen = new Fen();
     private PrintWriter fstream;
     private FileChooser fc = null;
 
-    public FileManager(){};
+    public FileManager(){
+        // Changes FileName in JFileChooser to FileName/FEN
+        UIManager.put("FileChooser.fileNameLabelText", "FileName/FEN:");
+    }
 
-    public void loadFile() {
+    public ArrayList<Spot> loadFile() {
         fc = new FileChooser(absPath);
-        System.out.println(fc.getFileName());
+        String result = fc.getFileName();
+        // Possibly fen
+        if (result != null) {
+            if (!result.contains(".")) {
+                System.out.println("Fen: " + result);
+                return fen.interpret(result);
+            } else {
+                // Process file
+            }
+        }
         fc = null;
+        return null;
     }
     
     public void safeFile(String fileName, BufferedImage img, GameBoard board) {
@@ -38,14 +52,11 @@ public class FileManager {
         } catch (Exception e) {
             System.out.println(e);
         }
-        fstream.close();
+        if (fstream != null) {
+            fstream.close();
+        }
     }
 
-    public void clean() {
-        this.whitePiecesMap.clear();
-        this.blackPiecesMap.clear();
-    }
-    
     public String getAbsPath() {
         return absPath;
     }

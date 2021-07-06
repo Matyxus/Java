@@ -3,11 +3,13 @@ import java.io.File;
 import javax.swing.JFileChooser;
 
 
+
 public class FileChooser {
     private JFileChooser fc;
-    private String fileName = null;
+    private String fileName;
 
     public FileChooser(String path) {
+        fileName = null;
         // Set up the file chooser
         fc = new JFileChooser();
         // Add a custom file filter and disable the default
@@ -19,11 +21,25 @@ public class FileChooser {
         // Add the preview pane
         fc.setAccessory(new ImagePreview(fc));
         // Show it
-        int returnVal = fc.showDialog(null,"Load");
+        int returnVal = fc.showDialog(null, "Load");
         // Process the results
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
             fileName = file.getName();
+            // User entered fen
+            if (!fileName.contains(".")) {
+                // Get fen from absolute path of file
+                String tmp = file.getAbsolutePath();
+                String[] arr = tmp.split("\\\\");
+                if (arr.length >= 8) {
+                    fileName = "";
+                    for (int i = arr.length-8; i < arr.length-1; i++) {
+                        fileName += arr[i] + "/";
+                    }
+                    // Dont add the last "/"
+                    fileName += arr[arr.length-1];
+                }
+            }
         } else if (returnVal == JFileChooser.CANCEL_OPTION) {
             System.out.println("Canceled FileChooser");
         }

@@ -18,7 +18,7 @@ public class Assets {
     private BufferedImage board;
     //public BufferedImage button_start, button_quit;
     //public BufferedImage back_button;
-    //public BufferedImage marker;
+    private BufferedImage marker;
     private BufferedImage perft_button;
     private HashMap<Integer, HashMap<Integer, BufferedImage>> piecesImg;
     //public BufferedImage[] arrows; //0-left, 1-right
@@ -45,8 +45,9 @@ public class Assets {
     
         board = loadImage(absPath + "\\chess\\images\\chess_board_640_480.png");
         perft_button = loadImage(absPath + "\\chess\\images\\menuImages\\Perft_button.png");
+        
+        marker = loadImage(absPath + "\\chess\\images\\dot.png");
         /*
-        marker = loadImage(absPath + "\\chess\\img\\dot.png");
         //BUTTONS
         button_start = loadImage(absPath + "\\chess\\img\\menuImages\\startButton.png");
         button_quit = loadImage(absPath + "\\chess\\img\\menuImages\\quitButton.png");
@@ -96,6 +97,14 @@ public class Assets {
      */
     public BufferedImage getBoard() {
         return board;
+    }
+
+    /**
+     * 
+     * @return image of red dot
+     */
+    public BufferedImage getMarker() {
+        return marker;
     }
 
     /**
