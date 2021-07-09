@@ -3,11 +3,12 @@ package main;
 import javax.swing.JFrame;
 //import javax.swing.JLabel;
 import javax.swing.JMenuBar;
+import javax.swing.JScrollPane;
 import javax.swing.JMenu;
-//import javax.swing.JPanel;
-//import javax.swing.JTextArea;
+import javax.swing.JTextArea;
 import javax.swing.event.MouseInputAdapter;
-//import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultCaret;
+import javax.swing.text.BadLocationException;
 // Awt.
 import java.awt.Canvas;
 import java.awt.Dimension;
@@ -18,7 +19,8 @@ public class Display {
 
     private JFrame frame;
     private Canvas canvas;
-
+    // textArea for printing piece moves
+    private JTextArea textArea;
     private final String title;
     private final int width, height;
     private final Handler handler;
@@ -32,22 +34,36 @@ public class Display {
     }
 
     private void crateDisplay() {
-        // Frame
+        // -------- Frame --------
         frame = new JFrame(title);
         frame.setSize(width, height);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setResizable(false);
         frame.setLocationRelativeTo(null);
-        // Load and Save buttons.
+        // -------- Load and Save buttons --------
         JMenuBar menuBar = createJMenuBar();
         frame.add(menuBar);
         frame.setJMenuBar(menuBar);
-        // Canvas.
+        // -------- Text area --------
+        textArea = new JTextArea();
+        textArea.setEditable(false);
+        textArea.setFont(textArea.getFont().deriveFont(30.0f));
+        DefaultCaret caret = (DefaultCaret) textArea.getCaret();
+        caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+        JScrollPane scrollPane = new JScrollPane(textArea);
+        scrollPane.setBounds(
+            handler.getAssets().getBoardWidth()+160,
+            0,
+            width - (handler.getAssets().getBoardWidth()+160),
+            handler.getAssets().getBoardHeight()
+        );
+        frame.add(scrollPane);
+        // -------- Canvas --------
         canvas = new Canvas();
         canvas.setPreferredSize(new Dimension(width, height));
-        // Mouse.
-        addMouseListener();
-        // Finishing frame.
+        // -------- Mouse --------
+        addMouse();
+        // -------- Finishing frame --------
         frame.add(canvas);
         frame.pack();
         frame.setVisible(true);
@@ -86,14 +102,43 @@ public class Display {
         return menuBar;
     }
 
-    /** 
-        Adds mouse listener to frame and canvas.
-    */
-    private void addMouseListener() {
+    /**
+     *  Adds mouse listener to frame and canvas
+     */
+    private void addMouse() {
         frame.addMouseListener(handler.getMouseManager());
         frame.addMouseMotionListener(handler.getMouseManager());
         canvas.addMouseListener(handler.getMouseManager());
         canvas.addMouseMotionListener(handler.getMouseManager());
+    }
+
+    /**
+     * @param text to be appended
+     */
+    public void appendText(String text) {
+        textArea.append(text);
+    }
+
+    /**
+     * @return removed last line from textArea, null if there is none
+     */
+    public String removeLastLine() {
+        String removed = null;
+        if (textArea.getDocument().getLength() > 0) {
+            try {
+                String content = textArea.getDocument().getText(0, textArea.getDocument().getLength());
+                int lastLineBreak = content.lastIndexOf('\n', textArea.getDocument().getLength()-2);
+                // Removing last line
+                if (lastLineBreak == -1) {
+                    lastLineBreak = 0;
+                }
+                removed =  textArea.getDocument().getText(lastLineBreak, textArea.getDocument().getLength() - lastLineBreak);
+                textArea.getDocument().remove(lastLineBreak, textArea.getDocument().getLength() - lastLineBreak);
+            } catch (BadLocationException e) {
+                System.out.println(e); 
+            }
+        }
+        return removed;
     }
 
     public Canvas getCanvas() {

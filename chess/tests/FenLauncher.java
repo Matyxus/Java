@@ -21,7 +21,7 @@ public class FenLauncher {
 
     public static void main(String[] args) {
         Fen tmp = new Fen();
-        GameBoard gameBoard = new GameBoard();
+        GameBoard gameBoard = new GameBoard(null);
         for (String fen : testCases) {
             ArrayList<Spot> pieces = tmp.interpret(fen);
             pieces.forEach((spot) -> gameBoard.addPiece(spot.getPiece(), spot.getColor(), spot.getSquare()));

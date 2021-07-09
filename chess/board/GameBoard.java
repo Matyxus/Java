@@ -3,9 +3,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import board.constants.Colors;
+import main.Handler;
 import managers.FileManager;
 
 public class GameBoard {
+    private final GameHistory gameHistory;
     private final MoveGen moveGen;
     private final FileManager fileManager;
     private int currentPlayer = Colors.WHITE;
@@ -13,7 +15,8 @@ public class GameBoard {
 
     private final Player[] players = {new Player(Colors.WHITE), new Player(Colors.BLACK)};
 
-    public GameBoard() {
+    public GameBoard(Handler handler) {
+        gameHistory = new GameHistory(handler);
         moveGen = new MoveGen(new Rays(), players);
         fileManager = new FileManager();
     }
@@ -92,6 +95,13 @@ public class GameBoard {
         return removed;
     }
 
+    /**
+     * @param fromSquare original position of piece
+     * @param toSquare destination of piece
+     * @param color of piece
+     * @param piece type
+     * @return Spot class if capture occured, else null
+     */
     public Spot movePiece(int fromSquare, int toSquare, int color,  int piece) {
         removePiece(color, fromSquare);
         // Check if capture occurred
@@ -103,6 +113,22 @@ public class GameBoard {
         return removedSpot;
     }
 
+    /**
+     * Calls movePiece function and also records move played,
+     * switches player to opponent and generates moves for him
+     * @param fromSquare original position of piece
+     * @param toSquare destination of piece
+     * @param color of piece
+     * @param piece type
+     */
+    public void playMove(int fromSquare, int toSquare, int color,  int piece) {
+        Spot from = containsPiece(fromSquare);
+        Spot capture = movePiece(fromSquare, toSquare, color, piece);
+        gameHistory.recordMove(from, capture, toSquare);
+        swapPlayer();
+        updatePieces(currentPlayer);
+    }
+
     public HashMap<Integer, Spot> getPieces(int color) {
         return players[color].getPlacedPieces();
     }
@@ -111,12 +137,20 @@ public class GameBoard {
         return players[color];
     }
 
+    private void swapPlayer() {
+        currentPlayer = (currentPlayer + 1) & 1;
+    }
+
     public void setCurrentPlayer(int currentPlayer) {
         this.currentPlayer = currentPlayer;
     }
     
     public int getCurrentPlayer() {
         return currentPlayer;
+    }
+
+    public GameHistory getGameHistory() {
+        return gameHistory;
     }
     
 }

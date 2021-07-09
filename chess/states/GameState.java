@@ -47,13 +47,11 @@ public class GameState extends State {
             previousSelected = null;
             return;
         }
-        // Check where user clicked
-        int x = handler.centerMouseX();
-        int y = handler.centerMouseY();
-        int squareIndex = handler.getAssets().getBoardSquare(x, y);
-        System.out.println("Clicked on square: " + squareIndex);
+        int squareIndex = handler.getAssets().getBoardSquare(
+            handler.centerMouseX(), 
+            handler.centerMouseY()
+        );
         Spot target = handler.getGameBoard().containsPiece(squareIndex);
-        System.out.println("Contains: " + (target != null));
         // User clicked on his piece
         if (target != null && target.getColor() == handler.getGameBoard().getCurrentPlayer()) {
             previousSelected = target;
@@ -61,15 +59,12 @@ public class GameState extends State {
             // Check if user clicked on path, to move piece,
             if ((previousSelected.getMoves() & (Size.ONE << squareIndex)) != 0) {
                 // Move piece to location
-                handler.getGameBoard().movePiece(
+                handler.getGameBoard().playMove(
                     previousSelected.getSquare(), // From
                     squareIndex,                  // To
                     previousSelected.getColor(),  // Color
                     previousSelected.getPiece()   // Piece
                 );
-                int currentPlayer = handler.getGameBoard().getCurrentPlayer();
-                handler.getGameBoard().setCurrentPlayer((currentPlayer+1) & 1);
-                handler.getGameBoard().updatePieces((currentPlayer+1) & 1);
                 previousSelected = null;
             }
         }

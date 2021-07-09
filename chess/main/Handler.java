@@ -5,13 +5,14 @@ import board.GameBoard;
 import managers.MouseManager;
 
 public class Handler {
-
+    private final Game game;
     private final GameBoard gameBoard;
     private final MouseManager mouseManager;
     private final Assets assets;
 
-    public Handler() {
-        this.gameBoard = new GameBoard();
+    public Handler(Game game) {
+        this.game = game;
+        this.gameBoard = new GameBoard(this);
         this.mouseManager = new MouseManager();
         this.assets = new Assets(0, 0);
     }
@@ -26,6 +27,10 @@ public class Handler {
     
     public Assets getAssets() {
         return assets;
+    }
+
+    public Game getGame() {
+        return game;
     }
 
     public int centerMouseX() {

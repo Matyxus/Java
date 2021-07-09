@@ -22,7 +22,7 @@ public class Game {
     public Game(String title, int width, int height) {
         this.width = width;
         this.height = height;
-        this.handler = new Handler();
+        this.handler = new Handler(this);
         this.graphicsManager = new GraphicsManager(handler);
         this.display = new Display(title, width, height, handler);
         State.setState(new PlacementState(handler)); // Initial state is PlacementState.
@@ -91,5 +91,13 @@ public class Game {
                 running = false;
             }
         }
+    }
+
+    public Display getDisplay() {
+        return display;
+    }
+
+    public GraphicsManager getGraphicsManager() {
+        return graphicsManager;
     }
 }

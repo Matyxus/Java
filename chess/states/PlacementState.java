@@ -7,6 +7,7 @@ import main.Handler;
 import board.Spot;
 import board.constants.Colors;
 import board.constants.Pieces;
+import board.constants.Size;
 import managers.UIManager;
 import ui.UIImageButton;
 
@@ -73,7 +74,7 @@ public class PlacementState extends State {
 
     @Override
     public void render(Graphics g) {
-        this.uiManager.render(g);
+        uiManager.render(g);
         // Render the selected piece.
         if (display || dragged) {
             g.drawImage(
@@ -87,6 +88,8 @@ public class PlacementState extends State {
 
     @Override
     protected void addButtons() {
+        // Add buttons showing pieces of both
+        // colors, for user to configure their own board
         for (int piece : Pieces.getPieces()) {
             int x = handler.getAssets().getBoardWidth();
             int y = handler.getAssets().PIECE_HEIGHT * piece;
@@ -130,22 +133,27 @@ public class PlacementState extends State {
                 160, 80, handler.getAssets().getPerft_button(), null) {
             @Override
             public void onClick() {
-                handler.getGameBoard().updatePieces(handler.getGameBoard().getCurrentPlayer());
-                State.setState(new GameState(handler));
+                int whiteKingSquare = handler.getGameBoard().getPlayer(Colors.WHITE).getKingSquare();
+                int blackKingSquare = handler.getGameBoard().getPlayer(Colors.BLACK).getKingSquare();
+                // If kings are present, switch to GameState
+                if (whiteKingSquare != Size.BOARD_SIZE && blackKingSquare != Size.BOARD_SIZE) {
+                    handler.getGameBoard().updatePieces(handler.getGameBoard().getCurrentPlayer());
+                    System.out.println("Switching to Game state");
+                    State.setState(new GameState(handler));
+                } else {
+                    System.out.println("Cannot play without king/s");
+                }
             }
         });
-        /*
-        // this will be button to set to viewerState
-        this.uiManager.addObject(new UIImageButton(Assets.BOARD_WIDTH, 420, 
-                2*Assets.PIECE_WIDTH,  Assets.PIECE_HEIGHT, Assets.button_quit, -1) {
+        
+        // Button to switch to ReplayState, for testing purposes
+        this.uiManager.addObject(new UIImageButton(160, handler.getAssets().getBoardHeight(), 
+                160, 80, handler.getAssets().getPerft_button(), null) {
             @Override
             public void onClick() {
-                checkForModification();
-                System.gc();
-                handler.getGame().startViewerState();
-                State.setState(handler.getGame().viewerState); 
+                System.out.println("Switching to Replay state");
+                State.setState(new ReplayState(handler));
             }
         });
-        */
     }
 }

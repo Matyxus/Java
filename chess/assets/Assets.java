@@ -21,7 +21,8 @@ public class Assets {
     private BufferedImage marker;
     private BufferedImage perft_button;
     private HashMap<Integer, HashMap<Integer, BufferedImage>> piecesImg;
-    //public BufferedImage[] arrows; //0-left, 1-right
+    private final BufferedImage[] leftArrows = new BufferedImage[2];
+    private final BufferedImage[] rightArrows = new BufferedImage[2];
 
     public Assets(int width, int height) {
         init();
@@ -47,6 +48,10 @@ public class Assets {
         perft_button = loadImage(absPath + "\\chess\\images\\menuImages\\Perft_button.png");
         
         marker = loadImage(absPath + "\\chess\\images\\dot.png");
+        leftArrows[0]  = loadImage(absPath + "\\chess\\images\\leftArrow.png");
+        leftArrows[1]  = loadImage(absPath + "\\chess\\images\\leftArrow_hover.png");
+        rightArrows[0] = loadImage(absPath + "\\chess\\images\\rightArrow.png");
+        rightArrows[1] = loadImage(absPath + "\\chess\\images\\rightArrow_hover.png");
         /*
         //BUTTONS
         button_start = loadImage(absPath + "\\chess\\img\\menuImages\\startButton.png");
@@ -105,6 +110,22 @@ public class Assets {
      */
     public BufferedImage getMarker() {
         return marker;
+    }
+
+    /**
+     * @param hover type of image, or idle -> (0/1)
+     * @return Image of arrow pointing left
+     */
+    public BufferedImage getLeftArrows(int hover) {
+        return leftArrows[hover];
+    }
+
+    /**
+     * @param hover type of image, or idle -> (0/1)
+     * @return Image of arrow pointing right
+     */
+    public BufferedImage getRightArrows(int hover) {
+        return rightArrows[hover];
     }
 
     /**

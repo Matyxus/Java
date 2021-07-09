@@ -12,15 +12,16 @@ public abstract class State {
         this.handler = handler;
     }
 
-    /** 
-       Takes care of rendering objects in given state
-    */
+    /**
+     * Takes care of rendering objects in given state
+     * @param g graphics rendered
+     */
     public abstract void render(Graphics g);
 
     /** 
-        Takes care of updating objects in given state,
-        response to mouse events
-    */
+     *  Takes care of updating objects in given state 
+     *   in response to mouse events
+     */
     public abstract void update();
 
     /**

@@ -15,7 +15,7 @@ public class Perft {
     
     public Perft() {
         nodes = 0;
-        board = new GameBoard();
+        board = new GameBoard(null);
     }
 
     public boolean init(int depth, boolean hashing) {
