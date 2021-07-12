@@ -1,8 +1,7 @@
 package ui;
 
+import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
-import javax.swing.JTextField;
-
 
 public class PopUP {
 
@@ -14,12 +13,12 @@ public class PopUP {
         JOptionPane.showMessageDialog(null, text, "Message", JOptionPane.PLAIN_MESSAGE);
     }
 
-    public static String Trial() {
-        JTextField fenField = new JTextField();
-        Object[] params = {fenField};
-        JOptionPane.showConfirmDialog(null, params, "Fen", JOptionPane.OK_CANCEL_OPTION);
-        System.out.println(fenField.getText());
-        return fenField.getText();
+    public static void trial() {
+        JCheckBox ai = new JCheckBox("Play against computer?");
+        JCheckBox startingColor = new JCheckBox("White plays first?");
+        JCheckBox playAsColor = new JCheckBox("Play as White?");
+        Object[] params = {ai, startingColor, playAsColor};
+        JOptionPane.showConfirmDialog(null, params, "Fen", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
     }
 
 }

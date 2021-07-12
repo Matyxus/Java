@@ -7,6 +7,7 @@ import java.util.Map;
 import static java.util.Map.entry;
 
 import board.constants.Colors;
+import board.constants.Img;
 import board.constants.Pieces;
 import board.constants.Size;
 import main.Handler;
@@ -160,8 +161,10 @@ public class ReplayState extends State {
         });
 
         // Button to switch to show previous move, for testing purposes
-        this.uiManager.addObject(new UIImageButton(160, handler.getAssets().getBoardHeight(), 
-                160, 80, handler.getAssets().getLeftArrows(0), handler.getAssets().getLeftArrows(1)) {
+        this.uiManager.addObject(new UIImageButton(
+                160, handler.getAssets().getBoardHeight(), 160, 80, 
+                handler.getAssets().getLeftArrows(Img.IMG_UP), handler.getAssets().getLeftArrows(Img.IMG_DOWN)
+            ) {
             @Override
             public void onClick() {
                 System.out.println("Showing previous move");
@@ -170,8 +173,10 @@ public class ReplayState extends State {
         });
 
         // Button to switch to next move, for testing purposes
-        this.uiManager.addObject(new UIImageButton(320, handler.getAssets().getBoardHeight(), 
-                160, 80, handler.getAssets().getRightArrows(0), handler.getAssets().getRightArrows(1)) {
+        this.uiManager.addObject(new UIImageButton(
+                320, handler.getAssets().getBoardHeight(), 160, 80, 
+                handler.getAssets().getRightArrows(Img.IMG_UP), handler.getAssets().getRightArrows(Img.IMG_DOWN)
+            ) {
             @Override
             public void onClick() {
                 System.out.println("Showing next move");

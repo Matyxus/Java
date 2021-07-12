@@ -6,6 +6,7 @@ import java.awt.image.BufferedImage;
 import main.Handler;
 import board.Spot;
 import board.constants.Colors;
+import board.constants.Img;
 import board.constants.Pieces;
 import board.constants.Size;
 import managers.UIManager;
@@ -16,8 +17,8 @@ public class PlacementState extends State {
     private final UIManager uiManager;
     private BufferedImage pieceImage;
 
-    private boolean display = false; // Clicked on button containing piece.
-    private boolean dragged = false; // Clicked on piece on board.
+    private boolean display = false; // Clicked on button containing piece
+    private boolean dragged = false; // Clicked on piece on board
 
     private int displayPiece;
     private int displayPieceColor;
@@ -35,19 +36,18 @@ public class PlacementState extends State {
         int x = handler.centerMouseX();
         int y = handler.centerMouseY();
         int squareIndex = handler.getAssets().getBoardSquare(x, y);
-        System.out.println("Clicked on square: " + squareIndex);
         if (handler.getMouseManager().leftPressed()) {
             if (x < 8 && y < 8) {
-                // Place down pieces.
+                // Place down pieces
                 if (display || dragged) { 
-                    // Pawn cant be placed on 0th or 7th row.
+                    // Pawn cant be placed on 0th or 7th row
                     if (!(displayPiece == Pieces.PAWN && (y == 0 || y == 7))) { 
-                        // Put down picked piece from board, stop showing its img.
+                        // Put down picked piece from board, stop showing its img
                         handler.getGameBoard().placePiece(displayPiece, 
                             displayPieceColor, squareIndex);
                         dragged = false;
                     }
-                // Pickup piece and place it.
+                // Pickup piece and place it
                 } else if (handler.getGameBoard().containsPiece(squareIndex) != null) {
                     Spot target = handler.getGameBoard().containsPiece(squareIndex);
                     displayPiece = target.getPiece();
@@ -57,11 +57,11 @@ public class PlacementState extends State {
                     dragged = true;
                 }
             } else {
-                // Stop showing img.
+                // Stop showing img
                 display = dragged = false;
             }
         }
-        // Right click as removal of pieces on bord or to stop dragging piece.
+        // Right click as removal of pieces on bord or to stop dragging piece
         if (handler.getMouseManager().rightPressed()) {
             if (display || dragged) {
                 display = dragged = false;
@@ -75,7 +75,7 @@ public class PlacementState extends State {
     @Override
     public void render(Graphics g) {
         uiManager.render(g);
-        // Render the selected piece.
+        // Render the selected piece
         if (display || dragged) {
             g.drawImage(
                 pieceImage, 
@@ -102,7 +102,7 @@ public class PlacementState extends State {
                 public void onClick() {
                     if (object != null) {
                         display = true;
-                        pieceImage = getImage(0);
+                        pieceImage = getImage(Img.IMG_UP);
                         displayPiece = piece;
                         displayPieceColor = Colors.WHITE;
                     }
@@ -118,7 +118,7 @@ public class PlacementState extends State {
                 public void onClick() {
                     if (object != null) {
                         display = true;
-                        pieceImage = getImage(0);
+                        pieceImage = getImage(Img.IMG_UP);
                         displayPiece = piece;
                         displayPieceColor = Colors.BLACK;
                     }

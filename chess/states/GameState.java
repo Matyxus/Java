@@ -59,12 +59,14 @@ public class GameState extends State {
             // Check if user clicked on path, to move piece,
             if ((previousSelected.getMoves() & (Size.ONE << squareIndex)) != 0) {
                 // Move piece to location
-                handler.getGameBoard().playMove(
+                String text = handler.getGameBoard().playMove(
                     previousSelected.getSquare(), // From
                     squareIndex,                  // To
                     previousSelected.getColor(),  // Color
                     previousSelected.getPiece()   // Piece
                 );
+                // Write move to JTextArea
+                handler.getGame().getDisplay().appendText(text);
                 previousSelected = null;
             }
         }

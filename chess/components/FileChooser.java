@@ -2,13 +2,11 @@ package components;
 import java.io.File;
 import javax.swing.JFileChooser;
 
-
-
 public class FileChooser {
     private JFileChooser fc;
     private String fileName;
 
-    public FileChooser(String path) {
+    public FileChooser(String path, boolean save) {
         fileName = null;
         // Set up the file chooser
         fc = new JFileChooser();
@@ -21,16 +19,23 @@ public class FileChooser {
         // Add the preview pane
         fc.setAccessory(new ImagePreview(fc));
         // Show it
-        int returnVal = fc.showDialog(null, "Load");
+        int returnVal;
+        // Save or load
+        if (save) {
+            returnVal = fc.showDialog(null, "Save");
+        } else {
+            returnVal = fc.showDialog(null, "Load");
+        }
         // Process the results
         if (returnVal == JFileChooser.APPROVE_OPTION) {
             File file = fc.getSelectedFile();
             fileName = file.getName();
-            // User entered fen
-            if (!fileName.contains(".")) {
+            // User entered fen when loading
+            if (!fileName.contains(".") && !save) {
                 // Get fen from absolute path of file
                 String tmp = file.getAbsolutePath();
                 String[] arr = tmp.split("\\\\");
+                // Fen has 8 parts
                 if (arr.length >= 8) {
                     fileName = "";
                     for (int i = arr.length-8; i < arr.length-1; i++) {

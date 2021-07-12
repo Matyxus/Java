@@ -1,0 +1,12 @@
+Round: 0
+♙ (d2)   ->   (d4)
+Round: 1
+♟ (f7)   ->   (f5)
+Round: 2
+♙ (g2)   ->   (g4)
+Round: 3
+♟ (f5)   ->   (g4)
+CAPTURE: ♙
+Round: 4
+♕ (d1)   ->   (d3)
+rnbqkbnr/ppppp1pp/8/8/3P2p1/3Q4/PPP1PP1P/RNB1KBNR

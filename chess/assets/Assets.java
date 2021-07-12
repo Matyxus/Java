@@ -8,31 +8,26 @@ import java.util.HashMap;
 import javax.imageio.ImageIO;
 
 import board.constants.Colors;
+import board.constants.Img;
 import board.constants.Pieces;
 
 public class Assets {
-    // square dimensions
-    public final int PIECE_WIDTH = 80; // == SQUARE_WIDTH
+    // Same as dimension of square on chess board
+    public final int PIECE_WIDTH  = 80; // == SQUARE_WIDTH
     public final int PIECE_HEIGHT = 60; // == SQUARE_HEGIHT
     
-    private BufferedImage board;
+    private final BufferedImage board;
     //public BufferedImage button_start, button_quit;
     //public BufferedImage back_button;
-    private BufferedImage marker;
-    private BufferedImage perft_button;
-    private HashMap<Integer, HashMap<Integer, BufferedImage>> piecesImg;
-    private final BufferedImage[] leftArrows = new BufferedImage[2];
-    private final BufferedImage[] rightArrows = new BufferedImage[2];
+    private final BufferedImage marker;
+    private final BufferedImage perft_button;
+    private final HashMap<Integer, HashMap<Integer, BufferedImage>> piecesImg;
+    private final BufferedImage[] leftArrows = new BufferedImage[Img.IMG_TYPES];
+    private final BufferedImage[] rightArrows = new BufferedImage[Img.IMG_TYPES];
 
-    public Assets(int width, int height) {
-        init();
-    }
-    
-    private void init() {
-        String absPath = new File("").getAbsolutePath();
-        
+    public Assets() {
         // Load images of pieces.
-        BufferedImage piecesSheet = loadImage(absPath + "\\chess\\images\\sheet.png");
+        BufferedImage piecesSheet = loadImage(Img.IMAGE_PATH + "sheet.png");
         piecesImg = new HashMap<Integer, HashMap<Integer, BufferedImage>>();
         for (int color = Colors.WHITE; color < Colors.COLOR_COUNT; color++) {
             HashMap<Integer, BufferedImage> tmp = new HashMap<Integer, BufferedImage>();
@@ -44,33 +39,31 @@ public class Assets {
             piecesImg.put(color, tmp);
         }
     
-        board = loadImage(absPath + "\\chess\\images\\chess_board_640_480.png");
-        perft_button = loadImage(absPath + "\\chess\\images\\menuImages\\Perft_button.png");
+        board = loadImage(Img.IMAGE_PATH + "chess_board_640_480.png");
+        perft_button = loadImage(Img.IMAGE_PATH + "menuImages\\Perft_button.png");
         
-        marker = loadImage(absPath + "\\chess\\images\\dot.png");
-        leftArrows[0]  = loadImage(absPath + "\\chess\\images\\leftArrow.png");
-        leftArrows[1]  = loadImage(absPath + "\\chess\\images\\leftArrow_hover.png");
-        rightArrows[0] = loadImage(absPath + "\\chess\\images\\rightArrow.png");
-        rightArrows[1] = loadImage(absPath + "\\chess\\images\\rightArrow_hover.png");
+        marker = loadImage(Img.IMAGE_PATH + "dot.png");
+        leftArrows[Img.IMG_UP]  = loadImage(Img.IMAGE_PATH + "leftArrow.png");
+        leftArrows[Img.IMG_DOWN]  = loadImage(Img.IMAGE_PATH + "leftArrow_hover.png");
+        rightArrows[Img.IMG_UP] = loadImage(Img.IMAGE_PATH + "rightArrow.png");
+        rightArrows[Img.IMG_DOWN] = loadImage(Img.IMAGE_PATH + "rightArrow_hover.png");
         /*
         //BUTTONS
         button_start = loadImage(absPath + "\\chess\\img\\menuImages\\startButton.png");
         button_quit = loadImage(absPath + "\\chess\\img\\menuImages\\quitButton.png");
         back_button = loadImage(absPath + "\\chess\\img\\menuImages\\back_button.png");
-        arrows[0] =  loadImage(absPath + "\\chess\\img\\left_arrow.png");
-        arrows[1] =  loadImage(absPath + "\\chess\\img\\right_arrow.png");
         BOARD_WIDTH = board.getWidth();
         BOARD_HEIGHT = board.getHeight();
         */
         System.out.println("Images loaded successfully");
     }
-
+    
     /**
-     * 
      * @param path to file
      * @return Buffered image or null if failed to load
      */
     private BufferedImage loadImage(String path) {
+        System.out.println("Path: " + path);
         try {
             return ImageIO.read(new File(path));
         } catch (IOException e) {
@@ -87,7 +80,6 @@ public class Assets {
     }
 
     /**
-     * 
      * @param piece chess piece
      * @param color color of chess piece
      * @return BufferedImage of given piece of given color
@@ -97,7 +89,6 @@ public class Assets {
     }
     
     /**
-     * 
      * @return chess board
      */
     public BufferedImage getBoard() {
@@ -105,7 +96,6 @@ public class Assets {
     }
 
     /**
-     * 
      * @return image of red dot
      */
     public BufferedImage getMarker() {
@@ -113,7 +103,7 @@ public class Assets {
     }
 
     /**
-     * @param hover type of image, or idle -> (0/1)
+     * @param hover type of image (Up/Down)
      * @return Image of arrow pointing left
      */
     public BufferedImage getLeftArrows(int hover) {
@@ -121,7 +111,7 @@ public class Assets {
     }
 
     /**
-     * @param hover type of image, or idle -> (0/1)
+     * @param hover type of image (Up/Down)
      * @return Image of arrow pointing right
      */
     public BufferedImage getRightArrows(int hover) {
@@ -129,7 +119,6 @@ public class Assets {
     }
 
     /**
-     * 
      * @return chess boards width
      */
     public int getBoardWidth() {
@@ -137,7 +126,6 @@ public class Assets {
     }
 
     /**
-     * 
      * @return chess boards height
      */
     public int getBoardHeight() {
@@ -145,7 +133,6 @@ public class Assets {
     }
 
     /**
-     * 
      * @param x coord of mouse
      * @return makes window into squares (PIECE_WIDTH x PIECE_WIDTH)
      * and returns x coord of such a square, where mouse is.
@@ -155,7 +142,6 @@ public class Assets {
     }
 
     /**
-     * 
      * @param y coord of mouse
      * @return makes window into squares (PIECE_HEIGHT x PIECE_HEIGHT)
      * and returns y coord of such a square, where mouse is.
@@ -165,7 +151,6 @@ public class Assets {
     }
 
     /**
-     * 
      * @param x transformed using centerMouseX
      * @param y transformed using centerMouseY
      * @return index of chess board square, -1 if out of range.

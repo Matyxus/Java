@@ -79,6 +79,10 @@ public class Fen {
         return pieces;
     }
 
+    /**
+     * @param gameBoard
+     * @return FEN notation in String
+     */
     public String createFen(GameBoard gameBoard) {
         ArrayList<Spot> pieces = new ArrayList<Spot>();
         gameBoard.getPieces(Colors.BLACK).forEach((square, spot) ->

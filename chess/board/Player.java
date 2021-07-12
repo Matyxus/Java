@@ -9,7 +9,7 @@ public class Player {
 
     private long allPieces = 0;
     private final long[] individualPieces;
-    // HashMaps holding current placed pieces (key = index of square on board, topleft = 0)
+    // HashMaps holding current placed pieces (key = index of square on board, top left = 0)
     private final HashMap<Integer, Spot> placedPieces;
     private final int color;
     
@@ -90,7 +90,7 @@ public class Player {
     }
 
     /**
-     * @return the square king is currently on
+     * @return the square king is currently on, 64 if king is not present
      */
     public int getKingSquare() {
         return Long.numberOfTrailingZeros(individualPieces[Pieces.KING]);

@@ -1,46 +1,31 @@
 package board;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import board.constants.Colors;
-import main.Handler;
-import managers.FileManager;
 
 public class GameBoard {
     private final GameHistory gameHistory;
     private final MoveGen moveGen;
-    private final FileManager fileManager;
+    
     private int currentPlayer = Colors.WHITE;
     
 
     private final Player[] players = {new Player(Colors.WHITE), new Player(Colors.BLACK)};
 
-    public GameBoard(Handler handler) {
-        gameHistory = new GameHistory(handler);
+    public GameBoard() {
+        gameHistory = new GameHistory();
         moveGen = new MoveGen(new Rays(), players);
-        fileManager = new FileManager();
     }
 
+    /**
+     * Deletes pieces on board and resets
+     * associated values with them (e.g. bitboards)
+     */
     public void reset() {
         System.out.println("Deleting pieces");
         for (Player player : players) {
             player.resetVals();
         }
-    }
-
-    public void loadGame() {
-        ArrayList<Spot> pieces = fileManager.loadFile();
-        if (pieces != null && !pieces.isEmpty()) {
-            System.out.println("Loading Success");
-            reset();
-            pieces.forEach((spot) -> addPiece(
-                spot.getPiece(), spot.getColor(), spot.getSquare())
-            );
-        }
-    }
-
-    public void saveGame() {
-        System.out.println("Saving not implemented");
     }
 
     /**
@@ -77,11 +62,11 @@ public class GameBoard {
     }
 
     /**
-     * Places piece on given square, removes previous piece on this square if possible.
+     * Places piece on given square, removes previous piece on this square if possible
      * @param piece to be placed
      * @param color of piece
      * @param square of piece
-     * @return Structure of piece that was removed, null if none were removed.
+     * @return Structure of piece that was removed, null if none were removed
      */
     public Spot placePiece(int piece, int color, int square) {
         Spot removed = players[Colors.WHITE].getPlacedPieces().get(square);
@@ -100,7 +85,7 @@ public class GameBoard {
      * @param toSquare destination of piece
      * @param color of piece
      * @param piece type
-     * @return Spot class if capture occured, else null
+     * @return Spot class if capture occured, null otherwise
      */
     public Spot movePiece(int fromSquare, int toSquare, int color,  int piece) {
         removePiece(color, fromSquare);
@@ -120,13 +105,14 @@ public class GameBoard {
      * @param toSquare destination of piece
      * @param color of piece
      * @param piece type
+     * @return String containing text representation of move
      */
-    public void playMove(int fromSquare, int toSquare, int color,  int piece) {
+    public String playMove(int fromSquare, int toSquare, int color,  int piece) {
         Spot from = containsPiece(fromSquare);
         Spot capture = movePiece(fromSquare, toSquare, color, piece);
-        gameHistory.recordMove(from, capture, toSquare);
         swapPlayer();
         updatePieces(currentPlayer);
+        return gameHistory.recordMove(from, capture, toSquare);
     }
 
     public HashMap<Integer, Spot> getPieces(int color) {

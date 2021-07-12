@@ -1,7 +1,6 @@
 package main;
-// Swing.
+// Swing
 import javax.swing.JFrame;
-//import javax.swing.JLabel;
 import javax.swing.JMenuBar;
 import javax.swing.JScrollPane;
 import javax.swing.JMenu;
@@ -9,10 +8,9 @@ import javax.swing.JTextArea;
 import javax.swing.event.MouseInputAdapter;
 import javax.swing.text.DefaultCaret;
 import javax.swing.text.BadLocationException;
-// Awt.
+// Awt
 import java.awt.Canvas;
 import java.awt.Dimension;
-//import java.awt.Font;
 import java.awt.event.MouseEvent;
 
 public class Display {
@@ -25,7 +23,7 @@ public class Display {
     private final int width, height;
     private final Handler handler;
 
-    public Display(String title, int width, int height, Handler handler){
+    public Display(String title, int width, int height, Handler handler) {
         this.title = title;
         this.width = width;
         this.height = height;
@@ -69,6 +67,9 @@ public class Display {
         frame.setVisible(true);
     }
 
+    /**
+     * @return JMenuBar with Save and Load buttons
+     */
     private JMenuBar createJMenuBar() {
         JMenuBar menuBar = new JMenuBar();
         // -------- Save button -------- 
@@ -79,7 +80,7 @@ public class Display {
                 if (e.getButton() == MouseEvent.BUTTON1) {
                     System.out.println("Clicked on save");
                     if (handler.getGameBoard() != null) {
-                        handler.getGameBoard().saveGame();
+                        handler.saveGame(textArea.getText());
                     }
                 }
             }
@@ -91,9 +92,7 @@ public class Display {
             public void mousePressed(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
                     System.out.println("Clicked on load");
-                    if (handler.getGameBoard() != null) {
-                        handler.getGameBoard().loadGame();
-                    }
+                    handler.loadGame();
                 }
             }
         });
@@ -120,6 +119,13 @@ public class Display {
     }
 
     /**
+     * @param text to be set
+     */
+    public void setText(String text) {
+        textArea.setText(text);
+    }
+
+    /**
      * @return removed last line from textArea, null if there is none
      */
     public String removeLastLine() {
@@ -132,7 +138,7 @@ public class Display {
                 if (lastLineBreak == -1) {
                     lastLineBreak = 0;
                 }
-                removed =  textArea.getDocument().getText(lastLineBreak, textArea.getDocument().getLength() - lastLineBreak);
+                removed = textArea.getDocument().getText(lastLineBreak, textArea.getDocument().getLength() - lastLineBreak);
                 textArea.getDocument().remove(lastLineBreak, textArea.getDocument().getLength() - lastLineBreak);
             } catch (BadLocationException e) {
                 System.out.println(e); 

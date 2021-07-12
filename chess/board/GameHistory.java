@@ -5,7 +5,6 @@ import java.util.Map;
 
 import board.constants.Colors;
 import board.constants.Pieces;
-import main.Handler;
 
 public class GameHistory {
     private int round = 0;
@@ -42,10 +41,10 @@ public class GameHistory {
         "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1" 
     };
 
-    private final Handler handler;
+    
 
-    public GameHistory(Handler handler) {
-        this.handler = handler;
+    public GameHistory() {
+        System.out.println("Game History created");
     }
 
     /**
@@ -53,8 +52,9 @@ public class GameHistory {
      * @param from Spot class containing original piece
      * @param capture Spot class containign captured piece (null if none)
      * @param to destination
+     * @return String containing text representation of move
      */
-    public void recordMove(Spot from, Spot capture, int to) {
+    public String recordMove(Spot from, Spot capture, int to) {
         String result = "Round: " + round + "\n";
         // Piece
         result += pieceToUnicode.get(from.getColor()).get(from.getPiece());
@@ -73,10 +73,9 @@ public class GameHistory {
             result += pieceToUnicode.get(capture.getColor()).get(capture.getPiece());
             result += "\n";
         }
-        // Write result to JTextArea
-        handler.getGame().getDisplay().appendText(result);
         // Increase round
         round++;
+        return result;
     }   
 
     /**
