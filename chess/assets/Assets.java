@@ -22,8 +22,12 @@ public class Assets {
     private final BufferedImage marker;
     private final BufferedImage perft_button;
     private final HashMap<Integer, HashMap<Integer, BufferedImage>> piecesImg;
-    private final BufferedImage[] leftArrows = new BufferedImage[Img.IMG_TYPES];
-    private final BufferedImage[] rightArrows = new BufferedImage[Img.IMG_TYPES];
+    private final BufferedImage[] startButtons  = new BufferedImage[Img.IMG_TYPES];
+    private final BufferedImage[] replayButtons = new BufferedImage[Img.IMG_TYPES];
+    private final BufferedImage[] backButtons   = new BufferedImage[Img.IMG_TYPES];
+    private final BufferedImage[] leftArrows    = new BufferedImage[Img.IMG_TYPES];
+    private final BufferedImage[] rightArrows   = new BufferedImage[Img.IMG_TYPES];
+    
 
     public Assets() {
         // Load images of pieces.
@@ -43,10 +47,21 @@ public class Assets {
         perft_button = loadImage(Img.IMAGE_PATH + "menuImages\\Perft_button.png");
         
         marker = loadImage(Img.IMAGE_PATH + "dot.png");
+        // Left arrow
         leftArrows[Img.IMG_UP]  = loadImage(Img.IMAGE_PATH + "leftArrow.png");
         leftArrows[Img.IMG_DOWN]  = loadImage(Img.IMAGE_PATH + "leftArrow_hover.png");
+        // Right arrow
         rightArrows[Img.IMG_UP] = loadImage(Img.IMAGE_PATH + "rightArrow.png");
         rightArrows[Img.IMG_DOWN] = loadImage(Img.IMAGE_PATH + "rightArrow_hover.png");
+        // Start buttons
+        startButtons[Img.IMG_UP] = loadImage(Img.IMAGE_PATH + "menuImages\\startButton.png");
+        startButtons[Img.IMG_DOWN] = loadImage(Img.IMAGE_PATH + "menuImages\\startButton_hover.png");
+        // Replay Buttons
+        replayButtons[Img.IMG_UP] = loadImage(Img.IMAGE_PATH + "menuImages\\replayButton.png");
+        replayButtons[Img.IMG_DOWN] = loadImage(Img.IMAGE_PATH + "menuImages\\replayButton_hover.png");
+        // Back Buttons
+        backButtons[Img.IMG_UP] = loadImage(Img.IMAGE_PATH + "menuImages\\backButton.png");
+        backButtons[Img.IMG_DOWN] = loadImage(Img.IMAGE_PATH + "menuImages\\backButton_hover.png");
         /*
         //BUTTONS
         button_start = loadImage(absPath + "\\chess\\img\\menuImages\\startButton.png");
@@ -63,7 +78,6 @@ public class Assets {
      * @return Buffered image or null if failed to load
      */
     private BufferedImage loadImage(String path) {
-        System.out.println("Path: " + path);
         try {
             return ImageIO.read(new File(path));
         } catch (IOException e) {
@@ -100,6 +114,31 @@ public class Assets {
      */
     public BufferedImage getMarker() {
         return marker;
+    }
+
+    /**
+     * @param hover type of image (Up/Down)
+     * @return Image of back button
+     */
+    public BufferedImage getBackButton(int hover) {
+        return backButtons[hover];
+    }
+
+
+    /**
+     * @param hover type of image (Up/Down)
+     * @return Image of start button
+     */
+    public BufferedImage getStartButton(int hover) {
+        return startButtons[hover];
+    }
+
+    /**
+     * @param hover type of image (Up/Down)
+     * @return Image of replay button
+     */
+    public BufferedImage getReplayButton(int hover) {
+        return replayButtons[hover];
     }
 
     /**

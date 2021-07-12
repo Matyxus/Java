@@ -17,41 +17,25 @@ import ui.UIImageButton;
 
 
 public class ReplayState extends State {
-    
-    private final HashMap<String, Integer> unicodeToPiece = 
-        new HashMap<String, Integer>(Map.ofEntries(
+    /**
+     * Returns Map.Entry, where key is piece and value is color
+     */
+    private final HashMap<String, Map.Entry<Integer, Integer>> unicodeToPiece = 
+        new HashMap<String, Map.Entry<Integer, Integer>>(Map.ofEntries(
             // White Pieces
-            entry("\u2654",   Pieces.KING),   
-            entry("\u2655",   Pieces.QUEEN),  
-            entry("\u2656",   Pieces.ROOK),   
-            entry("\u2658",   Pieces.KNIGHT), 
-            entry("\u2657",   Pieces.BISHOP), 
-            entry("\u2659",   Pieces.PAWN), 
+            entry("\u2654",   entry(Pieces.KING, Colors.WHITE)),   
+            entry("\u2655",   entry(Pieces.QUEEN, Colors.WHITE)),  
+            entry("\u2656",   entry(Pieces.ROOK, Colors.WHITE)),   
+            entry("\u2658",   entry(Pieces.KNIGHT, Colors.WHITE)), 
+            entry("\u2657",   entry(Pieces.BISHOP, Colors.WHITE)), 
+            entry("\u2659",   entry(Pieces.PAWN, Colors.WHITE)), 
             // Black Pieces
-            entry("\u265A",   Pieces.KING),   
-            entry("\u265B",   Pieces.QUEEN),  
-            entry("\u265C",   Pieces.ROOK),   
-            entry("\u265E",   Pieces.KNIGHT), 
-            entry("\u265D",   Pieces.BISHOP), 
-            entry("\u265F",   Pieces.PAWN) 
-    ));
-
-    private final HashMap<String, Integer> unicodeToColor = 
-        new HashMap<String, Integer>(Map.ofEntries(
-            // White Pieces
-            entry("\u2654",   Colors.WHITE),   
-            entry("\u2655",   Colors.WHITE),  
-            entry("\u2656",   Colors.WHITE),   
-            entry("\u2658",   Colors.WHITE), 
-            entry("\u2657",   Colors.WHITE), 
-            entry("\u2659",   Colors.WHITE), 
-            // Black Pieces
-            entry("\u265A",   Colors.BLACK),   
-            entry("\u265B",   Colors.BLACK),  
-            entry("\u265C",   Colors.BLACK),   
-            entry("\u265E",   Colors.BLACK), 
-            entry("\u265D",   Colors.BLACK), 
-            entry("\u265F",   Colors.BLACK) 
+            entry("\u265A",   entry(Pieces.KING, Colors.BLACK)),   
+            entry("\u265B",   entry(Pieces.QUEEN, Colors.BLACK)),  
+            entry("\u265C",   entry(Pieces.ROOK, Colors.BLACK)),   
+            entry("\u265E",   entry(Pieces.KNIGHT, Colors.BLACK)), 
+            entry("\u265D",   entry(Pieces.BISHOP, Colors.BLACK)), 
+            entry("\u265F",   entry(Pieces.PAWN, Colors.BLACK)) 
     ));
 
     private final ArrayList<String> nextMoves;
@@ -110,20 +94,22 @@ public class ReplayState extends State {
     }
 
     private void pieceMovement(String[] text, boolean previous) {
-        int piece = unicodeToPiece.get(text[0]);
-        int color = unicodeToColor.get(text[0]);
+        Map.Entry<Integer, Integer> temp = unicodeToPiece.get(text[0]);
+        int piece = temp.getKey();
+        int color = temp.getValue();
         int from = algebraicToSquare(text[1]);
         int to = algebraicToSquare(text[3]);
         if (previous) {
             handler.getGameBoard().movePiece(to, from, color, piece);
             if (capturedPiece != null) {
-                piece = unicodeToPiece.get(capturedPiece);
-                color = unicodeToColor.get(capturedPiece);
+                temp = unicodeToPiece.get(capturedPiece);
+                piece = temp.getKey();
+                color = temp.getValue();
                 handler.getGameBoard().addPiece(piece, color, to);
             }
         } else {
             if (capturedPiece != null) {
-                handler.getGameBoard().removePiece(unicodeToColor.get(capturedPiece), to);
+                handler.getGameBoard().removePiece(unicodeToPiece.get(capturedPiece).getKey(), to);
             }
             handler.getGameBoard().movePiece(from, to, color, piece);
             
@@ -149,21 +135,13 @@ public class ReplayState extends State {
 
     @Override
     protected void addButtons() {
-        // Button to switch to PlacementState, for testing purposes
-        this.uiManager.addObject(new UIImageButton(0, handler.getAssets().getBoardHeight(), 
-                160, 80, handler.getAssets().getPerft_button(), null) {
-            @Override
-            public void onClick() {
-                System.out.println("Switching to Placement state");
-                // Check if king is present -> leads to error
-                State.setState(new PlacementState(handler));
-            }
-        });
-
         // Button to switch to show previous move, for testing purposes
         this.uiManager.addObject(new UIImageButton(
-                160, handler.getAssets().getBoardHeight(), 160, 80, 
-                handler.getAssets().getLeftArrows(Img.IMG_UP), handler.getAssets().getLeftArrows(Img.IMG_DOWN)
+                handler.getAssets().getBoardWidth(), 0,         // X, Y
+                handler.getAssets().PIECE_WIDTH,                // Width
+                handler.getAssets().PIECE_HEIGHT,               // Height
+                handler.getAssets().getLeftArrows(Img.IMG_UP),  // Idle image
+                handler.getAssets().getLeftArrows(Img.IMG_DOWN) // Hover image
             ) {
             @Override
             public void onClick() {
@@ -174,13 +152,32 @@ public class ReplayState extends State {
 
         // Button to switch to next move, for testing purposes
         this.uiManager.addObject(new UIImageButton(
-                320, handler.getAssets().getBoardHeight(), 160, 80, 
-                handler.getAssets().getRightArrows(Img.IMG_UP), handler.getAssets().getRightArrows(Img.IMG_DOWN)
+                handler.getAssets().getBoardWidth()+handler.getAssets().PIECE_WIDTH, 0, // X, Y
+                handler.getAssets().PIECE_WIDTH,                 // Width
+                handler.getAssets().PIECE_HEIGHT,                // Height
+                handler.getAssets().getRightArrows(Img.IMG_UP),  // Idle image
+                handler.getAssets().getRightArrows(Img.IMG_DOWN) // Hover image
             ) {
             @Override
             public void onClick() {
                 System.out.println("Showing next move");
                 parser(false);
+            }
+        });
+
+        // Button to switch to PlacementState, for testing purposes
+        this.uiManager.addObject(new UIImageButton(
+                handler.getAssets().getBoardWidth(),            // X
+                handler.getAssets().getBoardHeight() - handler.getAssets().PIECE_HEIGHT, // Y
+                2 * handler.getAssets().PIECE_WIDTH,            // Width
+                handler.getAssets().PIECE_HEIGHT,               // Height
+                handler.getAssets().getBackButton(Img.IMG_UP),  // Idle image
+                handler.getAssets().getBackButton(Img.IMG_DOWN) // Hover image
+            ) {
+            @Override
+            public void onClick() {
+                System.out.println("Switching to Placement state");
+                State.setState(new PlacementState(handler));
             }
         });
     }

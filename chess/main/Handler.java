@@ -1,10 +1,8 @@
 package main;
 
-import java.util.ArrayList;
-
 import assets.Assets;
+import assets.Pair;
 import board.GameBoard;
-import board.Spot;
 import managers.FileManager;
 import managers.MouseManager;
 
@@ -27,30 +25,27 @@ public class Handler {
      * Loads game either from FEN or from file
      */
     public void loadGame() {
-        ArrayList<Spot> pieces = null;
+        Pair<String, String> tmp = null;
         try {
-            pieces = fileManager.loadFile();
+            tmp = fileManager.loadFile();
         } catch (Exception e) {
             System.out.println(e);
         }
-        if (pieces != null && !pieces.isEmpty()) {
-            System.out.println("Loading Success");
-            gameBoard.reset();
-            // Load pieces
-            pieces.forEach((spot) -> gameBoard.addPiece(
-                spot.getPiece(), spot.getColor(), spot.getSquare())
-            );
-            // Load text history
-            game.getDisplay().setText(fileManager.getTextHistory());
+        if (!tmp.getKey().isEmpty()) {
+            if (gameBoard.loadFen(tmp.getKey())) {
+                System.out.println("Loading Success");
+                // Load text history
+                game.getDisplay().setText(tmp.getValue());
+            }
         }
     }
 
     /**
      * Saves game into two files .txt and .png
-     * @param img image of current board with pieces
+     * @param textHistory history of current game
      */
     public void saveGame(String textHistory) {
-        fileManager.safeFile(textHistory, game.getGraphicsManager().getScreenShot(), gameBoard);
+        fileManager.safeFile(textHistory, game.getGraphicsManager().getScreenShot(), gameBoard.createFen());
     }
 
     /**

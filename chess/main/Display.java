@@ -102,9 +102,11 @@ public class Display {
     }
 
     /**
-     *  Adds mouse listener to frame and canvas
+     *  Adds mouse listener to frame, canvas and textArea
      */
     private void addMouse() {
+        textArea.addMouseListener(handler.getMouseManager());
+        textArea.addMouseMotionListener(handler.getMouseManager());
         frame.addMouseListener(handler.getMouseManager());
         frame.addMouseMotionListener(handler.getMouseManager());
         canvas.addMouseListener(handler.getMouseManager());
@@ -119,7 +121,7 @@ public class Display {
     }
 
     /**
-     * @param text to be set
+     * @param text to be set, empty or null deletes current text
      */
     public void setText(String text) {
         textArea.setText(text);
@@ -130,6 +132,7 @@ public class Display {
      */
     public String removeLastLine() {
         String removed = null;
+        // Check if textArea is not empty
         if (textArea.getDocument().getLength() > 0) {
             try {
                 String content = textArea.getDocument().getText(0, textArea.getDocument().getLength());

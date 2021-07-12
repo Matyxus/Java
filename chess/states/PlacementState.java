@@ -36,6 +36,7 @@ public class PlacementState extends State {
         int x = handler.centerMouseX();
         int y = handler.centerMouseY();
         int squareIndex = handler.getAssets().getBoardSquare(x, y);
+        String currentFen = handler.getGameBoard().createFen();
         if (handler.getMouseManager().leftPressed()) {
             if (x < 8 && y < 8) {
                 // Place down pieces
@@ -70,6 +71,12 @@ public class PlacementState extends State {
                 handler.getGameBoard().removePiece(target.getColor(), squareIndex);
             }
         }
+        // Player modified board (by moving/adding/deleting piece)
+        // clear game history
+        if (!currentFen.equals(handler.getGameBoard().createFen())) {
+            System.out.println("Modification occured, clearing game history");
+            handler.getGame().getDisplay().setText("");
+        }
     }
 
     @Override
@@ -90,9 +97,10 @@ public class PlacementState extends State {
     protected void addButtons() {
         // Add buttons showing pieces of both
         // colors, for user to configure their own board
+        int y = 0;
         for (int piece : Pieces.getPieces()) {
             int x = handler.getAssets().getBoardWidth();
-            int y = handler.getAssets().PIECE_HEIGHT * piece;
+            y = handler.getAssets().PIECE_HEIGHT * piece;
             int width = handler.getAssets().PIECE_WIDTH;
             int height = handler.getAssets().PIECE_HEIGHT;
             BufferedImage pieceImg = handler.getAssets().getPieceImg(piece, Colors.WHITE);
@@ -127,10 +135,14 @@ public class PlacementState extends State {
             button.setObject(piece);
             this.uiManager.addObject(button);
         }
-
-        // Button to switch to GameState, for testing purposes
-        this.uiManager.addObject(new UIImageButton(0, handler.getAssets().getBoardHeight(), 
-                160, 80, handler.getAssets().getPerft_button(), null) {
+        y += handler.getAssets().PIECE_HEIGHT;
+        // Button to switch to GameState
+        this.uiManager.addObject(new UIImageButton(
+                handler.getAssets().getBoardWidth(), y,          // X, Y
+                2 * handler.getAssets().PIECE_WIDTH, handler.getAssets().PIECE_HEIGHT, // Width, Height
+                handler.getAssets().getStartButton(Img.IMG_UP),  // Idle image
+                handler.getAssets().getStartButton(Img.IMG_DOWN) // Hover image
+            ) {
             @Override
             public void onClick() {
                 int whiteKingSquare = handler.getGameBoard().getPlayer(Colors.WHITE).getKingSquare();
@@ -145,10 +157,15 @@ public class PlacementState extends State {
                 }
             }
         });
-        
-        // Button to switch to ReplayState, for testing purposes
-        this.uiManager.addObject(new UIImageButton(160, handler.getAssets().getBoardHeight(), 
-                160, 80, handler.getAssets().getPerft_button(), null) {
+        y += handler.getAssets().PIECE_HEIGHT;
+        // Button to switch to ReplayState
+        this.uiManager.addObject(new UIImageButton(
+                handler.getAssets().getBoardWidth(), y,           // X, Y
+                2 * handler.getAssets().PIECE_WIDTH,              // Width
+                handler.getAssets().PIECE_HEIGHT,                 // Height
+                handler.getAssets().getReplayButton(Img.IMG_UP),  // Idle image
+                handler.getAssets().getReplayButton(Img.IMG_DOWN) // Hover image
+            ) {
             @Override
             public void onClick() {
                 System.out.println("Switching to Replay state");

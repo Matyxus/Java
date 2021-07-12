@@ -1,45 +1,40 @@
 package managers;
-import board.Fen;
-import board.GameBoard;
-import board.Spot;
 import board.constants.Img;
+import assets.Pair;
 import components.FileChooser;
 
 import javax.imageio.ImageIO;
-
+import javax.swing.UIManager;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.awt.image.BufferedImage;
-import javax.swing.UIManager;
 
 public class FileManager {
-    private final Fen fen = new Fen();
-    private String textHistory = "";
     private FileChooser fc = null;
 
     public FileManager(){};
 
     /**
-     * @return
+     * @return Pair class, where key is fen, second is history of game
+     * in text format, both can be empty
      * @throws IOException
      */
-    public ArrayList<Spot> loadFile() throws IOException {
-        textHistory = "";
+    public Pair<String, String> loadFile() throws IOException {
+        String history = "";
+        String fen = "";
         // Changes FileName in JFileChooser to "FileName/FEN:"
         UIManager.put("FileChooser.fileNameLabelText", "FileName/FEN:");
         fc = new FileChooser(Img.SAVE_PATH, false);
         String result = fc.getFileName();
-        ArrayList<Spot> loadedPieces = null;
         // Possibly fen
         if (result != null) {
             if (!result.contains(".")) {
                 System.out.println("Fen: " + result);
-                return fen.interpret(result);
+                fen = result;
             } else if (result.contains(".png")) { // Process file
                 result = result.replace(".png", ".txt");
                 // Open streams
@@ -51,9 +46,9 @@ public class FileManager {
                     System.out.println("Line: " + strLine);
                     // Text history of game
                     if (!strLine.contains("/")) {
-                        textHistory += (strLine + "\n");
+                        history += (strLine + "\n");
                     } else { // Fen
-                        loadedPieces = fen.interpret(strLine);
+                        fen = strLine;
                     }
                 }
                 // Close streams
@@ -62,15 +57,15 @@ public class FileManager {
             }
         }
         fc = null;
-        return loadedPieces;
+        return new Pair<String, String>(fen, history);
     }
     
     /**
-     * @param textHistory
-     * @param img
-     * @param gameBoard
+     * @param textHistory of game
+     * @param img of current board with pieces on it
+     * @param fen of current position
      */
-    public void safeFile(String textHistory, BufferedImage img, GameBoard gameBoard) {
+    public void safeFile(String textHistory, BufferedImage img, String fen) {
         // Changes FileName in JFileChooser to "FileName:"
         UIManager.put("FileChooser.fileNameLabelText", "FileName:");
         // Ask user for file name
@@ -91,10 +86,9 @@ public class FileManager {
             imgFile.createNewFile();
             ImageIO.write(img, "png", imgFile); // Save png
             fstream = new PrintWriter(file.getAbsolutePath(), "UTF-8");
-            String currentFen = fen.createFen(gameBoard);
             // Save game
             fstream.print(textHistory);
-            fstream.print(currentFen);
+            fstream.print(fen);
         } catch (Exception e) {
             System.out.println(e);
         }
@@ -102,12 +96,5 @@ public class FileManager {
             fstream.close();
         }
         System.out.println("Saved succesfully");
-    }
-
-    /**
-     * @return history of loaded game in String format
-     */
-    public String getTextHistory() {
-        return textHistory;
     }
 }

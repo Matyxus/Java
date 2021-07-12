@@ -3,6 +3,7 @@ package states;
 import java.awt.Graphics;
 
 import board.Spot;
+import board.constants.Img;
 import board.constants.Size;
 import main.Handler;
 import managers.UIManager;
@@ -74,9 +75,15 @@ public class GameState extends State {
 
     @Override
     protected void addButtons() {
-        // Button to switch to PlacementState, for testing purposes
-        this.uiManager.addObject(new UIImageButton(0, handler.getAssets().getBoardHeight(), 
-                160, 80, handler.getAssets().getPerft_button(), null) {
+        // Button to switch to PlacementState
+        this.uiManager.addObject(new UIImageButton(
+                handler.getAssets().getBoardWidth(),            // X
+                handler.getAssets().getBoardHeight() - handler.getAssets().PIECE_HEIGHT, // Y
+                2 * handler.getAssets().PIECE_WIDTH,            // Width
+                handler.getAssets().PIECE_HEIGHT,               // Height
+                handler.getAssets().getBackButton(Img.IMG_UP),  // Idle image
+                handler.getAssets().getBackButton(Img.IMG_DOWN) // Hover image
+            ) {
             @Override
             public void onClick() {
                 System.out.println("Switching to Placement state");

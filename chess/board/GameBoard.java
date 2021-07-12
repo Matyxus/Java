@@ -1,4 +1,5 @@
 package board;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import board.constants.Colors;
@@ -6,6 +7,7 @@ import board.constants.Colors;
 public class GameBoard {
     private final GameHistory gameHistory;
     private final MoveGen moveGen;
+    private final Fen fen;
     
     private int currentPlayer = Colors.WHITE;
     
@@ -14,6 +16,7 @@ public class GameBoard {
 
     public GameBoard() {
         gameHistory = new GameHistory();
+        fen = new Fen();
         moveGen = new MoveGen(new Rays(), players);
     }
 
@@ -115,6 +118,23 @@ public class GameBoard {
         return gameHistory.recordMove(from, capture, toSquare);
     }
 
+    /**
+     * @param fen string to load
+     * @return true if fen is correct, false otherwise
+     */
+    public boolean loadFen(String fen) {
+        ArrayList<Spot> pieces = this.fen.interpret(fen);
+        if (pieces != null && !pieces.isEmpty()) {
+            reset();
+            // Load pieces
+            pieces.forEach((spot) -> addPiece(
+                spot.getPiece(), spot.getColor(), spot.getSquare())
+            );
+            return true;
+        }
+        return false;
+    }
+
     public HashMap<Integer, Spot> getPieces(int color) {
         return players[color].getPlacedPieces();
     }
@@ -137,6 +157,13 @@ public class GameBoard {
 
     public GameHistory getGameHistory() {
         return gameHistory;
+    }
+
+    /**
+     * @return Fen String of current board
+     */
+    public String createFen() {
+        return fen.createFen(this);
     }
     
 }
