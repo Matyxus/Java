@@ -16,9 +16,8 @@ public class GraphicsManager {
     }
 
     /**
-     * @param g Grapghics
-     * @apiNote
-     * Renders chess board and all pieces on it.
+     * Renders chess board and all pieces on it
+     * @param g Graphics
      */
     public void render(Graphics g) {
         g.drawImage(handler.getAssets().getBoard(), 0, 0, null);
@@ -26,8 +25,8 @@ public class GraphicsManager {
     }
 
     /**
-     * @param g Grapghics
-     * Renders pieces on board.
+     * Renders pieces on board
+     * @param g Graphics
      */
     private void renderPieces(Graphics g) {
         // White pieces.
@@ -58,15 +57,13 @@ public class GraphicsManager {
     public BufferedImage getScreenShot() {
         BufferedImage bimage = new BufferedImage 
         (
-            handler.getAssets().getBoardWidth(),   // width
-            handler.getAssets().getBoardHeight(),  // height
-            BufferedImage.TYPE_INT_ARGB            // image type
+            handler.getAssets().getBoardWidth(),   // Width
+            handler.getAssets().getBoardHeight(),  // Height
+            BufferedImage.TYPE_INT_ARGB            // Image type
         );
         Graphics bGr = bimage.createGraphics();
         render(bGr);
         bGr.dispose();
         return bimage;
     }
-    
-    
 }

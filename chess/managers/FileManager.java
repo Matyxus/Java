@@ -30,6 +30,7 @@ public class FileManager {
         UIManager.put("FileChooser.fileNameLabelText", "FileName/FEN:");
         fc = new FileChooser(Img.SAVE_PATH, false);
         String result = fc.getFileName();
+        fc = null;
         // Possibly fen
         if (result != null) {
             if (!result.contains(".")) {
@@ -56,7 +57,6 @@ public class FileManager {
                 fstream.close();
             }
         }
-        fc = null;
         return new Pair<String, String>(fen, history);
     }
     

@@ -17,8 +17,6 @@ public class Assets {
     public final int PIECE_HEIGHT = 60; // == SQUARE_HEGIHT
     
     private final BufferedImage board;
-    //public BufferedImage button_start, button_quit;
-    //public BufferedImage back_button;
     private final BufferedImage marker;
     private final BufferedImage perft_button;
     private final HashMap<Integer, HashMap<Integer, BufferedImage>> piecesImg;

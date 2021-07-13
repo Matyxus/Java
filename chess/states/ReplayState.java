@@ -4,17 +4,20 @@ import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+
+import assets.Pair;
+
 import static java.util.Map.entry;
 
+import board.Perft;
 import board.constants.Colors;
 import board.constants.Img;
 import board.constants.Pieces;
 import board.constants.Size;
 import main.Handler;
 import managers.UIManager;
+import ui.PopUP;
 import ui.UIImageButton;
-
-
 
 public class ReplayState extends State {
     /**
@@ -38,14 +41,19 @@ public class ReplayState extends State {
             entry("\u265F",   entry(Pieces.PAWN, Colors.BLACK)) 
     ));
 
+    // TO-DO: clear nextMoves when loading new game
+    /**
+     * Array holding previously removed moves
+     */
     private final ArrayList<String> nextMoves;
     private final UIManager uiManager;
 
     private String capturedPiece = null;
+    private Thread perftRunner = null;
 
     public ReplayState(Handler handler) {
         super(handler);
-        System.out.println("Initializing GameState");
+        System.out.println("Initializing ReplayState");
         uiManager = new UIManager();
         nextMoves = new ArrayList<String>();
         handler.getMouseManager().setUiManager(uiManager);
@@ -56,12 +64,11 @@ public class ReplayState extends State {
     // Round: X
     // {Piece} (pos)  ->  (pos)
     // *[*[Enpassant (pos)] Capture: {Piece}]
+
     private void parser(boolean previous) {
-        System.out.println("Parser:");
         String text = null;
         if (previous) {
             text = handler.getGame().getDisplay().removeLastLine();
-            nextMoves.add(text);
         } else if (nextMoves.size() != 0) {
             text = nextMoves.remove(nextMoves.size()-1);
             handler.getGame().getDisplay().appendText(text);
@@ -69,47 +76,58 @@ public class ReplayState extends State {
         if (text == null) {
             System.out.println("Nothing more to remove");
             return;
+        } else if (previous) { // Append not null text to array
+            nextMoves.add(text);
         }
-        System.out.println("Text: " + text);
         // Move piece
         if (text.contains("->")) {
-            System.out.println("Moving piece");
             text = text.replaceAll("[()]", "");
             pieceMovement(text.trim().split("\\s+"), previous);
-            // Stop recrusion only when text contains "Round"
-            parser(previous);
             // Add piece back / remove
-        } else if (text.contains("CAPTURE")) {
-            System.out.println("capture");
+        } else if (text.contains("Capture")) {
             // Enpassant has to be handled differently
             capturedPiece = text.trim().split("\\s+")[1];
-            // Stop recrusion only when text contains "Round"
-            parser(previous);
         } else { // Round
-            System.out.println("round");
             handler.getGameBoard().getGameHistory().setRound(
                 Integer.parseInt(text.trim().split("\\s+")[1])
             );
         }
+        // Recursively remove until move is finished
+        // Going back
+        if (previous && !text.contains("Round")) {
+            parser(previous);
+        } 
+        // Going forward
+        if (!previous && nextMoves.size() != 0 && !nextMoves.get(nextMoves.size()-1).contains("Round")) {
+            parser(previous);
+        }
+        capturedPiece = null;
     }
 
+    /**
+     * @param text array (Piece, pos, ->, pos)
+     * @param previous boolean telling wheter move should be done in reverse
+     */
     private void pieceMovement(String[] text, boolean previous) {
         Map.Entry<Integer, Integer> temp = unicodeToPiece.get(text[0]);
         int piece = temp.getKey();
         int color = temp.getValue();
         int from = algebraicToSquare(text[1]);
         int to = algebraicToSquare(text[3]);
+        // Move piece back from its current position
         if (previous) {
             handler.getGameBoard().movePiece(to, from, color, piece);
+            // Capture
             if (capturedPiece != null) {
                 temp = unicodeToPiece.get(capturedPiece);
                 piece = temp.getKey();
                 color = temp.getValue();
                 handler.getGameBoard().addPiece(piece, color, to);
             }
-        } else {
+        } else { // Move piece to its position as it happend in game
+            // Capture
             if (capturedPiece != null) {
-                handler.getGameBoard().removePiece(unicodeToPiece.get(capturedPiece).getKey(), to);
+                handler.getGameBoard().removePiece(unicodeToPiece.get(capturedPiece).getValue(), to);
             }
             handler.getGameBoard().movePiece(from, to, color, piece);
             
@@ -135,7 +153,7 @@ public class ReplayState extends State {
 
     @Override
     protected void addButtons() {
-        // Button to switch to show previous move, for testing purposes
+        // Button to switch to show previous move
         this.uiManager.addObject(new UIImageButton(
                 handler.getAssets().getBoardWidth(), 0,         // X, Y
                 handler.getAssets().PIECE_WIDTH,                // Width
@@ -150,7 +168,7 @@ public class ReplayState extends State {
             }
         });
 
-        // Button to switch to next move, for testing purposes
+        // Button to switch to next move
         this.uiManager.addObject(new UIImageButton(
                 handler.getAssets().getBoardWidth()+handler.getAssets().PIECE_WIDTH, 0, // X, Y
                 handler.getAssets().PIECE_WIDTH,                 // Width
@@ -165,7 +183,44 @@ public class ReplayState extends State {
             }
         });
 
-        // Button to switch to PlacementState, for testing purposes
+        // Button to start perft, for testing purposes
+        this.uiManager.addObject(new UIImageButton(
+                handler.getAssets().getBoardWidth(), handler.getAssets().PIECE_HEIGHT, // X, Y
+                2 * handler.getAssets().PIECE_WIDTH,    // Width
+                handler.getAssets().PIECE_HEIGHT,       // Height
+                handler.getAssets().getPerft_button(),  // Idle image
+                handler.getAssets().getPerft_button()   // Hover image
+            ) {
+            @Override
+            public void onClick() {
+                final Pair<Integer, Boolean> result = PopUP.perftSetupMessage();
+                if (result != null) {
+                    final String currentFen = handler.getGameBoard().createFen();
+                    // Create new hashmaps of pieces
+                    // to pass into function, since modification
+                    // to current can occur in different thread
+                    Runnable myrunnable = new Runnable() {
+                        public void run() {
+                            // Run perft
+                            final Perft perft = new Perft();
+                            Pair<Long, Long> temp = perft.init(
+                                result.getKey(), // Depth
+                                result.getValue() ? Colors.WHITE:Colors.BLACK, // Color
+                                currentFen // Fen
+                            );
+                            PopUP.messagePopUP(
+                                "Found: " + temp.getKey() + " moves in " + temp.getValue() + " milisec."
+                            );
+                        }
+                    };
+                    // Spawn new thread on which perft will run
+                    perftRunner = new Thread(myrunnable);
+                    perftRunner.start();
+                }
+            }
+        });
+
+        // Button to switch to PlacementState
         this.uiManager.addObject(new UIImageButton(
                 handler.getAssets().getBoardWidth(),            // X
                 handler.getAssets().getBoardHeight() - handler.getAssets().PIECE_HEIGHT, // Y
@@ -176,8 +231,12 @@ public class ReplayState extends State {
             ) {
             @Override
             public void onClick() {
-                System.out.println("Switching to Placement state");
-                State.setState(new PlacementState(handler));
+                if (perftRunner != null && perftRunner.isAlive()) {
+                    PopUP.messagePopUP("Wait untill perf finishes running");
+                } else {
+                    System.out.println("Switching to Placement state");
+                    State.setState(new PlacementState(handler));
+                }
             }
         });
     }

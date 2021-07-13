@@ -3,55 +3,72 @@ package board;
 import java.math.BigInteger;
 import java.util.HashMap;
 
+import assets.Pair;
+
 // https://www.chessprogramming.org/Perft_Results
 
-import board.constants.Colors;
-import board.constants.Pieces;
 import board.constants.Size;
 
 public class Perft {
     private final GameBoard board;
-    public static long nodes = 0;
+    private long nodes = 0;
     
     public Perft() {
-        nodes = 0;
         board = new GameBoard();
     }
 
-    public boolean init(int depth, boolean hashing) {
-        addAllPieces();
+    /**
+     * @param depth how many moves ahead should perft search
+     * @param color of player to start
+     * @param fen of board to be searched
+     * @return Pair, where key is sum of all moves, value is time
+     * taken in miliseconds
+     */
+    public Pair<Long, Long> init(int depth, int color, String fen) {
+        if (!board.loadFen(fen)) {
+            System.out.println("Incorrect fen:" + fen);
+            return null;
+        }
+        nodes = 0;
         long now = System.nanoTime();
-        perft(depth, Colors.WHITE);
+        perft(depth, color);
         long after = System.nanoTime() - now;
         System.out.println("Found nodes: " + nodes);
         System.out.println("Took sec: " + after/1000000000);
         System.out.println("Took milisec: " + after/1000000);
         System.out.println("Took mircrosec: " + after/1000);
         System.out.println("Took nanosec: " + after);
-        return true;
+        return new Pair<Long, Long>(nodes, after/1000000);
     }
 
     private void perft(int depth, int color) {
         board.updatePieces(color);
+        // Count moves
         if (depth == 1) {
             board.getPieces(color).forEach((square, spot)->nodes+=Long.bitCount(spot.getMoves()));
             return;
         }
+        // Copy placed pieces
         final HashMap<Integer, Spot> moves = new HashMap<Integer, Spot>();
         board.getPieces(color).forEach((square, spot)-> {
             final Spot temp = new Spot(spot.getPiece(), color, square, false);
             temp.setMoves(spot.getMoves());
             moves.put(square, temp);
         });
+        // Recursion
         moves.forEach((square, spot)->{
             int piece = spot.getPiece();
             long move = spot.getMoves();
             int result = 0;
+            // Play all moves
             while (move != 0) {
                 result = Long.numberOfTrailingZeros(move);
                 move ^= (Size.ONE << result);
+                // Do move
                 Spot capture = board.movePiece(square, result, color, piece);
+                // Switch player
                 perft(depth-1, (color+1) & 1);
+                // Undo move
                 undoMove(piece, color, square, result);
                 if (capture != null) {
                     board.addPiece(capture.getPiece(), capture.getColor(), capture.getSquare());
@@ -69,7 +86,7 @@ public class Perft {
      * @param bitBoard
      * Prints bit board as binary number, 8 numbers on single line
      */
-    public static final void Printer(long bitBoard) {
+    public final void boardPrinter(long bitBoard) {
         String fin = "";
         String txt = "";
         for (int i = 0; i < Size.BOARD_SIZE; i++) {
@@ -84,37 +101,6 @@ public class Perft {
             }
         }
         System.out.println(fin);
-    }
-
-    /**
-     *  Places pieces according to standard chess board starting position
-     */
-    private final void addAllPieces() {
-        for (int i = 0; i < Size.ROWS; i++) { // pawns
-            board.addPiece(Pieces.PAWN, Colors.WHITE, 48+i);
-            board.addPiece(Pieces.PAWN, Colors.BLACK, 8+i);
-        }
-        // Kings
-        board.addPiece(Pieces.KING, Colors.WHITE, 60);
-        board.addPiece(Pieces.KING, Colors.BLACK, 4);
-        // Queens
-        board.addPiece(Pieces.QUEEN, Colors.WHITE, 59);
-        board.addPiece(Pieces.QUEEN, Colors.BLACK, 3);
-        // Bishops
-        board.addPiece(Pieces.BISHOP, Colors.WHITE, 58);
-        board.addPiece(Pieces.BISHOP, Colors.WHITE, 61);
-        board.addPiece(Pieces.BISHOP, Colors.BLACK, 2);
-        board.addPiece(Pieces.BISHOP, Colors.BLACK, 5);
-        // Knights
-        board.addPiece(Pieces.KNIGHT, Colors.WHITE, 62);
-        board.addPiece(Pieces.KNIGHT, Colors.WHITE, 57);
-        board.addPiece(Pieces.KNIGHT, Colors.BLACK, 1);
-        board.addPiece(Pieces.KNIGHT, Colors.BLACK, 6);
-        // Rooks
-        board.addPiece(Pieces.ROOK, Colors.WHITE, 63);
-        board.addPiece(Pieces.ROOK, Colors.WHITE, 56);
-        board.addPiece(Pieces.ROOK, Colors.BLACK, 7);
-        board.addPiece(Pieces.ROOK, Colors.BLACK, 0);
     }
 }
 

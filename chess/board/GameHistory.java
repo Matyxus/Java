@@ -67,9 +67,9 @@ public class GameHistory {
         if (capture != null) {
             // Enpassant
             if (capture.getSquare() != to) {
-                result += "ENPASSANT (" + squareToAlgebraic[capture.getSquare()] + ") ";
+                result += "Enpassant (" + squareToAlgebraic[capture.getSquare()] + ") ";
             }
-            result += "CAPTURE: ";
+            result += "Capture: ";
             result += pieceToUnicode.get(capture.getColor()).get(capture.getPiece());
             result += "\n";
         }

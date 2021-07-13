@@ -3,9 +3,10 @@ import java.awt.Graphics;
 import main.Handler;
 
 public abstract class State {
-    // Current running state
+    /**
+     * Current running state, null if none is running
+     */ 
     private static State currentState = null;
-    // Handler to manage mouse and carry gameboard
     protected Handler handler;
     
     public State(Handler handler) {
