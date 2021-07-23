@@ -1,9 +1,6 @@
 package board;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 
 import board.constants.Colors;
 import board.constants.Pieces;
@@ -12,24 +9,7 @@ import board.constants.Size;
 // https://www.chessprogramming.org/Forsyth-Edwards_Notation
 
 public class Fen {
-    final HashMap<Character, Integer> charToPiece = new HashMap<Character, Integer>(Map.of(
-        'k', Pieces.KING,
-        'q', Pieces.QUEEN,
-        'r', Pieces.ROOK,
-        'n', Pieces.KNIGHT,
-        'b', Pieces.BISHOP,
-        'p', Pieces.PAWN
-    ));
-
-    final HashMap<Integer, Character> pieceToChar = new HashMap<Integer, Character>(Map.of(
-        Pieces.KING,   'k', 
-        Pieces.QUEEN,  'q', 
-        Pieces.ROOK,   'r',
-        Pieces.KNIGHT, 'n', 
-        Pieces.BISHOP, 'b', 
-        Pieces.PAWN,   'p' 
-    ));
-
+    
     public Fen() {};
 
     /**
@@ -37,23 +17,20 @@ public class Fen {
      * @return Array of Spots (containing pieces, colors etc..) 
      * if fen string is correct, null otherwise
      */
-    public ArrayList<Spot> interpret(String fen) {
+    public ArrayList<Spot> interpret(String fen, Position position) {
         String[] splitted = fen.split("/");
         String[] info = splitted[splitted.length-1].split(" ");
         splitted[splitted.length-1] = info[0];
-        /*
-        for (String string : info) {
-            System.out.println(string);
-        }
-        */
-        // Board
+        assert (splitted.length == 8);
+        assert (info.length >= 4);
+        // ----------------- Board ----------------- 
         ArrayList<Spot> pieces = new ArrayList<Spot>();
         int square = 0;
         for (int i = 0; i < splitted.length; i++) {
             for (Character ch : splitted[i].toCharArray()) {
                 if (isPiece(ch)) {
                     int color = (Character.isLowerCase(ch)) ? Colors.BLACK : Colors.WHITE;
-                    pieces.add(new Spot(charToPiece.get(Character.toLowerCase(ch)), color, square, false));
+                    pieces.add(new Spot(Pieces.charToPiece.get(Character.toLowerCase(ch)), color, square));
                     square++;
                 } else if (isNum(ch)) {
                     square += Integer.parseInt(String.valueOf(ch));
@@ -68,14 +45,28 @@ public class Fen {
             System.out.println("Squares: " + square);
             return null;
         }
-        // Info
-        /*
-        for (int i = 1; i < info.length; i++) {
-            for (Character ch : info[i].toCharArray()) {
-                System.out.println(ch);
-            }
+        // ----------------- Info ----------------- 
+        if (!(info[1].equals("w") || info[1].equals("b"))) {
+            return null;
         }
-        */
+        position.setSideToMove(
+            (info[1].equals("w")) ? Colors.WHITE : Colors.BLACK
+        );
+        // Castle rights
+        position.clearCastleRights(Colors.WHITE);
+        position.clearCastleRights(Colors.BLACK);
+        if (!info[2].equals("-")) {
+            for (Character ch : info[2].toCharArray()) {
+                int color = (Character.isUpperCase(ch)) ? Colors.WHITE : Colors.BLACK;
+                assert (Pieces.charToPiece.get(Character.toLowerCase(ch)) != null);
+                int side = Pieces.charToPiece.get(Character.toLowerCase(ch));
+                position.setCastlingRight(color, side, true);
+            }
+        } 
+        // Enpassant square
+        position.setEnpassant(
+            (info[3].equals("-")) ? 0 : (Size.algebraicToSquare(info[3]))
+        );
         return pieces;
     }
 
@@ -84,81 +75,78 @@ public class Fen {
      * @return FEN notation in String
      */
     public String createFen(GameBoard gameBoard) {
-        ArrayList<Spot> pieces = new ArrayList<Spot>();
-        gameBoard.getPieces(Colors.BLACK).forEach((square, spot) ->
-            pieces.add(spot)
-        );
-        gameBoard.getPieces(Colors.WHITE).forEach((square, spot) ->
-            pieces.add(spot)
-        );
-        Collections.sort(pieces, 
-            (o1, o2) -> ((Integer) o1.getSquare()).compareTo(o2.getSquare())
-        );
+        final int[] whitePieces = gameBoard.getPieces(Colors.WHITE);
+        final int[] blackPieces = gameBoard.getPieces(Colors.BLACK);
+        // ----------------- Board ----------------- 
         String result = "";
-        int square = 0;
-        int counter = Size.ROWS;
-        for (Spot piece : pieces) {
-            Character ch = pieceToChar.get(piece.getPiece());
-            ch = (piece.getColor() == Colors.WHITE) ? Character.toUpperCase(ch) : ch;
-            // Square diff
-            if (square != piece.getSquare()) {
-                int diff = (piece.getSquare()-square);
-                square = piece.getSquare();
-                // Something is already written, add part of 
-                // diff to have sum of 8 between "/.../"
-                if (counter != Size.ROWS && (counter - diff) <= 0) {
-                    diff -= counter;
-                    result += Integer.toString(counter);
+        int empty = 0;
+        for (int square = 0; square < Size.BOARD_SIZE; square++) {
+            // Check if board on this square is empty
+            if (whitePieces[square] != -1 || blackPieces[square] != -1) {
+                // Write empty squares
+                if (empty != 0) {
+                    result += String.valueOf(empty);
+                    empty = 0;
+                }
+                // Write piece
+                result += (
+                    (whitePieces[square] != -1) ? 
+                    Character.toUpperCase(Pieces.pieceToChar.get(whitePieces[square]))
+                    :
+                    Pieces.pieceToChar.get(blackPieces[square])
+                );
+            } else {
+                empty++;
+            }
+            // After every 8 squares add "/", apart from first and last
+            if (square != 0 && ((square+1) % Size.ROWS) == 0) {
+                // Write empty squares
+                if (empty != 0) {
+                    result += String.valueOf(empty);
+                    empty = 0;
+                }
+                // Dont at at the end
+                if (square != (Size.BOARD_SIZE-1)) {
                     result += "/";
                 }
-                // Eights
-                while (diff >= Size.ROWS) {
-                    result += "8/";
-                    diff -= Size.ROWS;
-                }
-                // Reset counter
-                if (result.length() > 0 && result.charAt(result.length()-1) == '/') {
-                    counter = Size.ROWS;
-                }
-                // Rest of the diff
-                if (diff > 0) {
-                    result += Integer.toString(diff);
-                }
-                counter -= diff;
-            }
-            // Add piece
-            result += ch;
-            square++;
-            counter--;
-            if (counter == 0) {
-                counter = Size.ROWS;
-                result += "/";
             }
         }
-
-        // Square has to be equal to board_size
-        if (square != Size.BOARD_SIZE) {
-            int diff = (Size.BOARD_SIZE - square);
-            if (counter != Size.ROWS && (counter - diff) <= 0) {
-                diff -= counter;
-                result += Integer.toString(counter);
-                result += "/";
-            }
-            // Diff is equal or more than 8
-            while (diff >= Size.ROWS) {
-                result += "8/";
-                diff -= Size.ROWS;
-            }
-            // Diff is less than 8
-            if (diff > 0) {
-                result += Integer.toString(diff);
+        // ----------------- Info ----------------- 
+        // Side to move
+        result += " " + (
+            (gameBoard.getCurrentPositon().getSideToMove() == Colors.WHITE) ?
+            "w " : "b "
+        );
+        // Castling rights
+        empty = 0;
+        for (int color = Colors.WHITE; color < Colors.COLOR_COUNT; color++) {
+            for (int side = Pieces.KING; side < 2; side++) {
+                if (gameBoard.getCurrentPositon().getCastlingRights()[color][side]) {
+                    result += (
+                        (color == Colors.WHITE) ? 
+                        Character.toUpperCase(Pieces.pieceToChar.get(side))
+                        :
+                        Pieces.pieceToChar.get(side)
+                    );
+                } else {
+                    empty++;
+                }
             }
         }
-        
-        // Remove last '/' if present
-        if (result.length() > 0 && result.charAt(result.length()-1) == '/') {
-            result = result.substring(0, result.length()-1);
+        // No castling rights
+        if (empty == 4) {
+            result += "- ";
+        } else {
+            result += " ";
         }
+        // Enpassant square
+        if (gameBoard.getCurrentPositon().getEnpassant() != 0) {
+            result += Size.SQUARE_TO_ALGEBRAIC[gameBoard.getCurrentPositon().getEnpassant()];
+        } else {
+            result += "-";
+        }
+        // Pawn counters
+        result += " 0 1";
         return result;
     }
 
@@ -167,7 +155,7 @@ public class Fen {
      * @return true if char is piece, false otherwise
      */
     private boolean isPiece(char ch) {
-        return (charToPiece.get(ch) != null || charToPiece.get(Character.toLowerCase(ch)) != null);
+        return (Pieces.charToPiece.get(ch) != null || Pieces.charToPiece.get(Character.toLowerCase(ch)) != null);
     }
 
     /**

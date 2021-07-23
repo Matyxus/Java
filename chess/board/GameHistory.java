@@ -1,77 +1,48 @@
 package board;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import board.constants.Colors;
 import board.constants.Pieces;
+import board.constants.Size;
 
 public class GameHistory {
     private int round = 0;
-    private final HashMap<Integer, HashMap<Integer, String>> pieceToUnicode = 
-        new HashMap<Integer, HashMap<Integer, String>>(Map.of(
-            // White Pieces
-            Colors.WHITE, new HashMap<Integer, String>(Map.of(
-                Pieces.KING,   "\u2654",
-                Pieces.QUEEN,  "\u2655",
-                Pieces.ROOK,   "\u2656",
-                Pieces.KNIGHT, "\u2658",
-                Pieces.BISHOP, "\u2657",
-                Pieces.PAWN,   "\u2659"
-            )),
-            // Black Pieces
-            Colors.BLACK, new HashMap<Integer, String>(Map.of(
-                Pieces.KING,   "\u265A",
-                Pieces.QUEEN,  "\u265B",
-                Pieces.ROOK,   "\u265C",
-                Pieces.KNIGHT, "\u265E",
-                Pieces.BISHOP, "\u265D",
-                Pieces.PAWN,   "\u265F"
-            ))
-    ));
-
-    private final String[] squareToAlgebraic = {
-        "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
-        "a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7",
-        "a6", "b6", "c6", "d6", "e6", "f6", "g6", "h6",
-        "a5", "b5", "c5", "d5", "e5", "f5", "g5", "h5",
-        "a4", "b4", "c4", "d4", "e4", "f4", "g4", "h4",
-        "a3", "b3", "c3", "d3", "e3", "f3", "g3", "h3",
-        "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2",
-        "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1" 
-    };
-
     
-
     public GameHistory() {
         System.out.println("Game History created");
     }
 
     /**
-     * Writes move in text format into JTextArea in Display class
-     * @param from Spot class containing original piece
-     * @param capture Spot class containign captured piece (null if none)
-     * @param to destination
+     * @param piece moving piece
+     * @param color of moving piece
+     * @param capture captured piece, -1 if none
+     * @param move Move class, contaning type of move, and origin + destination
      * @return String containing text representation of move
      */
-    public String recordMove(Spot from, Spot capture, int to) {
+    public String recordMove(int piece, int color, int capture, Move move) {
         String result = "Round: " + round + "\n";
         // Piece
-        result += pieceToUnicode.get(from.getColor()).get(from.getPiece());
+        result += Pieces.pieceToUnicode[color][piece];
         // From square
-        result += (" (" + squareToAlgebraic[from.getSquare()] + ") ");
+        result += (" (" + Size.SQUARE_TO_ALGEBRAIC[move.getFromSquare()] + ") ");
         result += "  ->  ";
         // To Square
-        result += (" (" + squareToAlgebraic[to] + ")\n");
-        // Handle Capture
-        if (capture != null) {
-            // Enpassant
-            if (capture.getSquare() != to) {
-                result += "Enpassant (" + squareToAlgebraic[capture.getSquare()] + ") ";
+        result += (" (" + Size.SQUARE_TO_ALGEBRAIC[move.getToSquare()] + ")\n");
+        if (move.isCastle()) {
+            result += "Castling: ";
+            result += Pieces.pieceToUnicode[color][move.getCastleSide()] + " side\n";
+        } else {
+            // Handle Capture
+            if (capture != -1) {
+                result += "Capture: ";
+                result += Pieces.pieceToUnicode[Colors.opposite_color(color)][capture];
+                result += "\n";
             }
-            result += "Capture: ";
-            result += pieceToUnicode.get(capture.getColor()).get(capture.getPiece());
-            result += "\n";
+
+            if (move.isPromotion()) {
+                result += "Promoting to: ";
+                result += Pieces.pieceToUnicode[color][move.getPromotionPiece()];
+                result += "\n";
+            }
         }
         // Increase round
         round++;

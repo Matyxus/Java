@@ -3,8 +3,8 @@ package states;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
+import assets.Pair;
 import main.Handler;
-import board.Spot;
 import board.constants.Colors;
 import board.constants.Img;
 import board.constants.Pieces;
@@ -44,15 +44,18 @@ public class PlacementState extends State {
                     // Pawn cant be placed on 0th or 7th row
                     if (!(displayPiece == Pieces.PAWN && (y == 0 || y == 7))) { 
                         // Put down picked piece from board, stop showing its img
-                        handler.getGameBoard().placePiece(displayPiece, 
-                            displayPieceColor, squareIndex);
+                        handler.getGameBoard().addPiece(
+                            displayPiece, 
+                            displayPieceColor, 
+                            squareIndex
+                        );
                         dragged = false;
                     }
                 // Pickup piece and place it
                 } else if (handler.getGameBoard().containsPiece(squareIndex) != null) {
-                    Spot target = handler.getGameBoard().containsPiece(squareIndex);
-                    displayPiece = target.getPiece();
-                    displayPieceColor = target.getColor();
+                    Pair<Integer, Integer> target = handler.getGameBoard().containsPiece(squareIndex);
+                    displayPiece = target.getKey();
+                    displayPieceColor = target.getValue();
                     pieceImage = handler.getAssets().getPieceImg(displayPiece, displayPieceColor);
                     handler.getGameBoard().removePiece(displayPieceColor, squareIndex);
                     dragged = true;
@@ -67,12 +70,13 @@ public class PlacementState extends State {
             if (display || dragged) {
                 display = dragged = false;
             } else if (handler.getGameBoard().containsPiece(squareIndex) != null) {
-                Spot target = handler.getGameBoard().containsPiece(squareIndex);
-                handler.getGameBoard().removePiece(target.getColor(), squareIndex);
+                Pair<Integer, Integer> target = handler.getGameBoard().containsPiece(squareIndex);
+                handler.getGameBoard().removePiece(target.getValue(), squareIndex);
             }
         }
         // Player modified board (by moving/adding/deleting piece)
         // clear game history
+        
         if (!currentFen.equals(handler.getGameBoard().createFen())) {
             System.out.println("Modification occured, clearing game history");
             handler.getGame().getDisplay().setText("");
@@ -149,7 +153,6 @@ public class PlacementState extends State {
                 int blackKingSquare = handler.getGameBoard().getPlayer(Colors.BLACK).getKingSquare();
                 // If kings are present, switch to GameState
                 if (whiteKingSquare != Size.BOARD_SIZE && blackKingSquare != Size.BOARD_SIZE) {
-                    handler.getGameBoard().updatePieces(handler.getGameBoard().getCurrentPlayer());
                     System.out.println("Switching to Game state");
                     State.setState(new GameState(handler));
                 } else {

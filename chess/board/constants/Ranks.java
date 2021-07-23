@@ -11,4 +11,13 @@ public class Ranks  {
     public static final long RANK_6 = 0b0000000000000000111111110000000000000000000000000000000000000000L;
     public static final long RANK_7 = 0b0000000011111111000000000000000000000000000000000000000000000000L;
     public static final long RANK_8 = 0b1111111100000000000000000000000000000000000000000000000000000000L;
+    public static final long[] ALL_RANKS = {RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8};
+    /**
+     * Ranks for pawn promotion, indexed (e.g PROMOTION_RANKS[Colors.WHITE])
+     */
+    public static final long[] PROMOTION_RANKS = {RANK_1, RANK_8};
+
+    public static final int getRow(int square) {
+        return (square & 7);
+    }
 }

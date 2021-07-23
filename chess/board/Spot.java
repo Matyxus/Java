@@ -1,5 +1,7 @@
 package board;
 
+import java.util.ArrayList;
+
 /**
  * Class containing piece, its color, square on board, moves
  */
@@ -7,37 +9,25 @@ public class Spot {
     private final int piece;
     private final int color;
     private final int square;
-    private boolean hasMoved;
-    private long moves;
-    private long attacks;
+    private final ArrayList<Move> moves;
 
-    public Spot(int piece, int color, int square, boolean hasMoved) {
+    public Spot(int piece, int color, int square) {
         this.piece = piece;
         this.color = color;
         this.square = square;
-        this.hasMoved = hasMoved;
+        moves = new ArrayList<Move>();
     }
     
     /**
-     * @param path by which moves get modified, meaning
-     * all moves must be on path
+     * @param move_list from which moves are taken
      */
-    public void modifyMoves(long path) {
-        moves &= path;
-    }
-
-    /**
-     * @param moves to be assigned
-     */
-    public void setMoves(long moves) {
-        this.moves = moves;
-    }
-
-    /**
-     * @param attacks to be assigned
-     */
-    public void setAttacks(long attacks) {
-        this.attacks = attacks;
+    public void setMoves(ArrayList<Move> move_list) {
+        moves.clear();
+        move_list.forEach(move -> {
+            if (move.getFromSquare() == square) {
+                moves.add(move);
+            }
+        });
     }
 
     /**
@@ -50,7 +40,7 @@ public class Spot {
     /**
      * @return legal moves
      */
-    public long getMoves() {
+    public ArrayList<Move> getMoves() {
         return moves;
     }
 
@@ -59,20 +49,6 @@ public class Spot {
      */
     public int getPiece() {
         return piece;
-    }
-
-    /**
-     * @return true if pieces has moved, false otherwise
-     */
-    public boolean getHasMoved() {
-        return hasMoved;
-    }
-    
-    /**
-     * @return pieces that are under attack by piece on this spot
-     */
-    public long getAttacks() {
-        return attacks;
     }
 
     /**

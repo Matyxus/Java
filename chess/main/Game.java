@@ -25,11 +25,11 @@ public class Game {
         this.handler = new Handler(this);
         this.graphicsManager = new GraphicsManager(handler);
         this.display = new Display(title, width, height, handler);
-        State.setState(new PlacementState(handler)); // Initial state is PlacementState.
+        State.setState(new PlacementState(handler)); // Initial state is PlacementState
     }
 
     /**
-     * Renders the state and chess board with pieces.
+     * Renders current state and chess board with pieces
      */
     private void render() {
         bs = display.getCanvas().getBufferStrategy();
@@ -73,14 +73,14 @@ public class Game {
         running = true;
         while (running) {
             now = System.nanoTime();
-            // Check if input happened.
+            // Check if input happened
             if (handler.getMouseManager().leftPressed() || handler.getMouseManager().rightPressed()) {
                 update();
             }
             // Necessary, game loop is too fast, reset mouse buttons
             handler.getMouseManager().setLeftClick(false);
             handler.getMouseManager().setRightClick(false);
-            // Calculate if previous waiting was correct.
+            // Calculate if previous waiting was correct
             after = System.nanoTime() - now;
             wait = Math.abs((OPTIMAL_TIME - after) / 1000000);
             try {

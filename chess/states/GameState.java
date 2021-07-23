@@ -1,10 +1,14 @@
 package states;
 
 import java.awt.Graphics;
+import java.util.ArrayList;
 
+import assets.Pair;
+import board.Move;
 import board.Spot;
+import board.constants.Files;
 import board.constants.Img;
-import board.constants.Size;
+import board.constants.Ranks;
 import main.Handler;
 import managers.UIManager;
 import ui.UIImageButton;
@@ -12,14 +16,23 @@ import ui.UIImageButton;
 public class GameState extends State {
 
     private final UIManager uiManager;
+    private final ArrayList<Move> move_list;
     private Spot previousSelected = null;
 
     public GameState(Handler handler) {
         super(handler);
         System.out.println("Initializing GameState");
         uiManager = new UIManager();
+        move_list = new ArrayList<Move>();
+        handler.getGameBoard().updatePieces(move_list);
         handler.getMouseManager().setUiManager(uiManager);
         addButtons();
+        // If its new game
+        if (handler.getGameBoard().getGameHistory().getRound() == 0) {
+            String text = "Human vs Human\n";
+            text += handler.getGameBoard().createFen() + "\n";
+            handler.getGame().getDisplay().appendText(text);
+        }
     }
 
     @Override
@@ -27,17 +40,14 @@ public class GameState extends State {
         uiManager.render(g);
         // Render where piece can move, if user selected any
         if (previousSelected != null) {
-            long moves = previousSelected.getMoves();
-            while (moves != 0) {
-                int square = Long.numberOfTrailingZeros(moves);
-                moves ^= (Size.ONE << square);
+            previousSelected.getMoves().forEach(move -> {
                 g.drawImage(
-                    handler.getAssets().getMarker(), // image
-                    (square % 8) * handler.getAssets().PIECE_WIDTH,  // x
-                    (square / 8) * handler.getAssets().PIECE_HEIGHT, // y
-                    null // observer
+                    handler.getAssets().getMarker(), // Image
+                    Ranks.getRow(move.getToSquare()) * handler.getAssets().PIECE_WIDTH,     // X
+                    Files.getColumn(move.getToSquare()) * handler.getAssets().PIECE_HEIGHT, // Y
+                    null // Observer
                 );
-            }
+            });
         }
     }
 
@@ -52,23 +62,27 @@ public class GameState extends State {
             handler.centerMouseX(), 
             handler.centerMouseY()
         );
-        Spot target = handler.getGameBoard().containsPiece(squareIndex);
+        Pair<Integer, Integer> target = handler.getGameBoard().containsPiece(squareIndex);
         // User clicked on his piece
-        if (target != null && target.getColor() == handler.getGameBoard().getCurrentPlayer()) {
-            previousSelected = target;
+        if (target != null && target.getValue() == handler.getGameBoard().getCurrentPlayer()) {
+            previousSelected = new Spot(target.getKey(), target.getValue(), squareIndex);
+            previousSelected.setMoves(move_list);
         } else if (previousSelected != null) {
-            // Check if user clicked on path, to move piece,
-            if ((previousSelected.getMoves() & (Size.ONE << squareIndex)) != 0) {
-                // Move piece to location
-                String text = handler.getGameBoard().playMove(
-                    previousSelected.getSquare(), // From
-                    squareIndex,                  // To
-                    previousSelected.getColor(),  // Color
-                    previousSelected.getPiece()   // Piece
-                );
-                // Write move to JTextArea
-                handler.getGame().getDisplay().appendText(text);
-                previousSelected = null;
+            // Check if user clicked on square where
+            // piece can move to
+            for (Move move : previousSelected.getMoves()) {
+                if (move.getToSquare() == squareIndex) {
+                    // Move piece to location
+                    int capture = handler.getGameBoard().applyMove(move);
+                    String text = handler.getGameBoard().recordMove(move, capture);
+                    // Write move to JTextArea
+                    handler.getGame().getDisplay().appendText(text);
+                    previousSelected = null;
+                    // Generate new moves
+                    move_list.clear();
+                    handler.getGameBoard().updatePieces(move_list);
+                    break;
+                }
             }
         }
     }

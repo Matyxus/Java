@@ -1,17 +1,24 @@
 package board;
 
-import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import assets.Pair;
-
-// https://www.chessprogramming.org/Perft_Results
-
+import board.constants.Pieces;
 import board.constants.Size;
+
+// https://www.chessprogramming.org/Perft
 
 public class Perft {
     private final GameBoard board;
     private long nodes = 0;
+    
+    /**
+     * https://www.chessprogramming.org/Perft#Divide
+     */
+    private final HashMap<String, Long> divide = new HashMap<>();
+    private final Cache cache = new Cache();
+    private int maxDepth = 0;
     
     public Perft() {
         board = new GameBoard();
@@ -19,88 +26,94 @@ public class Perft {
 
     /**
      * @param depth how many moves ahead should perft search
-     * @param color of player to start
      * @param fen of board to be searched
      * @return Pair, where key is sum of all moves, value is time
-     * taken in miliseconds
+     * taken in seconds
      */
-    public Pair<Long, Long> init(int depth, int color, String fen) {
+    public Pair<Long, Long> init(int depth, String fen) {
+        board.reset();
         if (!board.loadFen(fen)) {
             System.out.println("Incorrect fen:" + fen);
             return null;
         }
+        maxDepth = depth;
+        System.out.println("Testing perft to depth: " + depth);
+        System.out.println(board);
         nodes = 0;
         long now = System.nanoTime();
-        perft(depth, color);
+        nodes = perft(depth);
         long after = System.nanoTime() - now;
         System.out.println("Found nodes: " + nodes);
         System.out.println("Took sec: " + after/1000000000);
         System.out.println("Took milisec: " + after/1000000);
-        System.out.println("Took mircrosec: " + after/1000);
-        System.out.println("Took nanosec: " + after);
-        return new Pair<Long, Long>(nodes, after/1000000);
+        System.out.println("**************************** Finished ****************************");
+        cache.clear();
+        return new Pair<Long, Long>(nodes, after/1000000000);
     }
 
-    private void perft(int depth, int color) {
-        board.updatePieces(color);
-        // Count moves
-        if (depth == 1) {
-            board.getPieces(color).forEach((square, spot)->nodes+=Long.bitCount(spot.getMoves()));
-            return;
+    private long perft(int depth) {
+        Pair<Integer, Long> entry = cache.contains(board.getCurrentPositon().getHash());
+        if (entry != null && entry.getKey() == depth) {
+            return entry.getValue();
         }
         // Copy placed pieces
-        final HashMap<Integer, Spot> moves = new HashMap<Integer, Spot>();
-        board.getPieces(color).forEach((square, spot)-> {
-            final Spot temp = new Spot(spot.getPiece(), color, square, false);
-            temp.setMoves(spot.getMoves());
-            moves.put(square, temp);
-        });
-        // Recursion
-        moves.forEach((square, spot)->{
-            int piece = spot.getPiece();
-            long move = spot.getMoves();
-            int result = 0;
-            // Play all moves
-            while (move != 0) {
-                result = Long.numberOfTrailingZeros(move);
-                move ^= (Size.ONE << result);
-                // Do move
-                Spot capture = board.movePiece(square, result, color, piece);
-                // Switch player
-                perft(depth-1, (color+1) & 1);
-                // Undo move
-                undoMove(piece, color, square, result);
-                if (capture != null) {
-                    board.addPiece(capture.getPiece(), capture.getColor(), capture.getSquare());
+        ArrayList<Move> move_list = new ArrayList<>();
+        board.updatePieces(move_list);
+        // Count moves
+        if (depth == 1) {
+            // Divide
+            if (depth == maxDepth) {
+                for (Move move : move_list) {
+                    String movement = Size.SQUARE_TO_ALGEBRAIC[move.getFromSquare()] + Size.SQUARE_TO_ALGEBRAIC[move.getToSquare()];
+                    if (move.isPromotion()) {
+                        movement += Pieces.pieceToChar.get(move.getPromotionPiece());
+                    }
+                    divide.put(movement, 1L);
                 }
             }
+            cache.insert(board.getCurrentPositon().getHash(), new Pair<Integer,Long>(depth, (long)move_list.size()));
+            return move_list.size();
+        }
+        Position current = board.getCurrentPositon().deepCopy();
+        long now = 0;
+        // Recursion, play all moves
+        for (Move move : move_list) {
+            // Do move
+            int capture = board.applyMove(move);
+            // Switch player
+            long before = now;
+            now += perft(depth-1);
+            // Divide
+            if (depth == maxDepth) {
+                String movement = Size.SQUARE_TO_ALGEBRAIC[move.getFromSquare()] + Size.SQUARE_TO_ALGEBRAIC[move.getToSquare()];
+                if (move.isPromotion()) {
+                    movement += Pieces.pieceToChar.get(move.getPromotionPiece());
+                }
+                divide.put(movement, (now - before));
+            }
+            // Undo move
+            board.undoMove(move, capture, current);
+        }
+        cache.insert(current.getHash(), new Pair<Integer,Long>(depth, now));
+        return now;
+    }
+    
+    /**
+     * For comparison with another long values
+     * @return number of moves found
+     */
+    public long getNodes() {
+        return nodes;
+    }
+
+    /**
+     * Prints divide (for debugging purposes)
+     */
+    public void printDivide() {
+        divide.forEach((move, count) -> {
+            System.out.println(move + ": " + count);
         });
     }
 
-    private void undoMove(int piece, int color, int toSquare, int fromSquare) {
-        board.removePiece(color, fromSquare);
-        board.addPiece(piece, color, toSquare);
-    }
-   
-    /**
-     * @param bitBoard
-     * Prints bit board as binary number, 8 numbers on single line
-     */
-    public final void boardPrinter(long bitBoard) {
-        String fin = "";
-        String txt = "";
-        for (int i = 0; i < Size.BOARD_SIZE; i++) {
-            if (BigInteger.valueOf(bitBoard).testBit(i)) {
-                txt+="1";
-            } else {
-                txt +="0";
-            }
-            if (txt.length() == 8){
-                fin += txt + "\n";
-                txt = "";
-            }
-        }
-        System.out.println(fin);
-    }
 }
 

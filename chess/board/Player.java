@@ -1,7 +1,5 @@
 package board;
 
-import java.util.HashMap;
-
 import board.constants.Pieces;
 import board.constants.Size;
 
@@ -10,13 +8,13 @@ public class Player {
     private long allPieces = 0;
     private final long[] individualPieces;
     // HashMaps holding current placed pieces (key = index of square on board, top left = 0)
-    private final HashMap<Integer, Spot> placedPieces;
+    private final int[] placedPieces;
     private final int color;
     
     public Player(int color) {
         this.color = color;
         individualPieces = new long[Pieces.PIECE_COUNT];
-        placedPieces = new HashMap<>();
+        placedPieces = new int[64];
         resetVals();
     }
 
@@ -28,7 +26,9 @@ public class Player {
         for (int i = 0; i < individualPieces.length; i++) {
             individualPieces[i] = 0;
         }
-        placedPieces.clear();
+        for (int i = 0; i < placedPieces.length; i++) {
+            placedPieces[i] = -1;
+        }
     }
 
     /**
@@ -36,7 +36,7 @@ public class Player {
      * @param square at which piece is placed
      */
     public void addPiece(int piece, int square) {
-        placedPieces.put(square, new Spot(piece, color, square, false));
+        placedPieces[square] = piece;
         final long targetSquare = Size.ONE << square;
         allPieces |= targetSquare;
         individualPieces[piece] |= targetSquare;
@@ -44,20 +44,45 @@ public class Player {
 
     /**
      * @param square where piece is
+     * @return Spot class
      */
-    public void removePiece(int square) {
-        final int removedPiece = (placedPieces.remove(square)).getPiece();
+    public int removePiece(int square) {
+        final int removedPiece = placedPieces[square];
+        placedPieces[square] = -1;
         final long targetSquare = Size.ONE << square;
         allPieces ^= targetSquare;
         individualPieces[removedPiece] ^= targetSquare;
+        return removedPiece;
+    }
+
+    /**
+     * @param from square
+     * @param to square
+     */
+    public long movePiece(int from, int to) {
+        final int tmp = placedPieces[from];
+        placedPieces[from] = -1;
+        final long targetSquare = (Size.ONE << from) | (Size.ONE << to);
+        allPieces ^= targetSquare;
+        individualPieces[tmp] ^= targetSquare;
+        placedPieces[to] = tmp;
+        return targetSquare;
+    }
+
+    public long getSliders() {
+        return (
+            individualPieces[Pieces.BISHOP] | 
+            individualPieces[Pieces.ROOK]   |
+            individualPieces[Pieces.QUEEN]
+        );
     }
 
     /**
      * @param square where piece is
      * @return the square, or null if there is none
      */
-    public Spot containsPiece(int square) {
-        return placedPieces.get(square);
+    public int containsPiece(int square) {
+        return placedPieces[square];
     }
 
     /**
@@ -75,10 +100,17 @@ public class Player {
         return individualPieces[piece];
     }
 
+     /**
+     * @return bitboards containing all pieces
+     */
+    public long[] getAllIndividualPieces() {
+        return individualPieces;
+    }
+
     /**
      * @return HashMap of all placed pieces
      */
-    public HashMap<Integer, Spot> getPlacedPieces() {
+    public int[] getPlacedPieces() {
         return placedPieces;
     }
 
@@ -95,5 +127,17 @@ public class Player {
     public int getKingSquare() {
         return Long.numberOfTrailingZeros(individualPieces[Pieces.KING]);
     }
-    
+
+    /**
+     * @param square where piece is
+     * @param promoteTo type of piece piece on square will become
+     */
+    public void promotePiece(int square, int promoteTo) {
+        final long targetSquare = Size.ONE << square;
+        // Remove original piece
+        individualPieces[placedPieces[square]] ^= targetSquare;
+        // Add new Piece
+        placedPieces[square] = promoteTo;
+        individualPieces[promoteTo] |= targetSquare;
+    }
 }

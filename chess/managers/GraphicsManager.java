@@ -1,12 +1,13 @@
 package managers;
 
 import main.Handler;
-import board.Spot;
 import board.constants.Colors;
+import board.constants.Files;
+import board.constants.Ranks;
+import board.constants.Size;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import java.util.HashMap;
 
 public class GraphicsManager {
     private final Handler handler;
@@ -29,26 +30,24 @@ public class GraphicsManager {
      * @param g Graphics
      */
     private void renderPieces(Graphics g) {
-        // White pieces.
-        HashMap<Integer, Spot> curr = handler.getGameBoard().getPieces(Colors.WHITE);
-        curr.forEach((index, square) -> {
-            g.drawImage(
-                handler.getAssets().getPieceImg(square.getPiece(), Colors.WHITE), // Image
-                handler.getAssets().PIECE_WIDTH*(index%8),  // X
-                handler.getAssets().PIECE_HEIGHT*(index/8), // Y
-                null // Observer
-            );
-        });
-        // Black pieces.
-        curr = handler.getGameBoard().getPieces(Colors.BLACK);
-        curr.forEach((index, square) -> {
-            g.drawImage(
-                handler.getAssets().getPieceImg(square.getPiece(), Colors.BLACK), // Image
-                handler.getAssets().PIECE_WIDTH*(index%8),  // X 
-                handler.getAssets().PIECE_HEIGHT*(index/8), // Y
-                null // Observer
-            );
-        });
+        int[] whitePieces = handler.getGameBoard().getPieces(Colors.WHITE);
+        int[] blackPieces = handler.getGameBoard().getPieces(Colors.BLACK);
+        for (int square = 0; square < Size.BOARD_SIZE; square++) {
+            int piece = whitePieces[square];
+            int color = Colors.WHITE;
+            if (blackPieces[square] != -1) {
+                piece = blackPieces[square];
+                color = Colors.BLACK;
+            }
+            if (piece != -1) {
+                g.drawImage(
+                    handler.getAssets().getPieceImg(piece, color), // Image
+                    handler.getAssets().PIECE_WIDTH*Ranks.getRow(square),  // X
+                    handler.getAssets().PIECE_HEIGHT*Files.getColumn(square), // Y
+                    null // Observer
+                );
+            }
+        }
     }
 
     /**
