@@ -18,6 +18,9 @@ public class Fen {
      * if fen string is correct, null otherwise
      */
     public ArrayList<Spot> interpret(String fen, Position position) {
+        if (fen == null || fen.isEmpty()) {
+            return null;
+        }
         String[] splitted = fen.split("/");
         String[] info = splitted[splitted.length-1].split(" ");
         splitted[splitted.length-1] = info[0];

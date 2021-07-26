@@ -79,9 +79,7 @@ public class Display {
             public void mousePressed(MouseEvent e) {
                 if (e.getButton() == MouseEvent.BUTTON1) {
                     System.out.println("Clicked on save");
-                    if (handler.getGameBoard() != null) {
-                        handler.saveGame(textArea.getText());
-                    }
+                    handler.saveGame();
                 }
             }
         });

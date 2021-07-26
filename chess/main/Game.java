@@ -85,6 +85,9 @@ public class Game {
             wait = Math.abs((OPTIMAL_TIME - after) / 1000000);
             try {
                 render();
+                if (State.getState() != null) {
+                    State.getState().tick();
+                }
                 Thread.sleep(wait);
             } catch (InterruptedException e) {
                 e.printStackTrace();

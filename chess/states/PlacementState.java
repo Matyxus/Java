@@ -36,9 +36,10 @@ public class PlacementState extends State {
         int x = handler.centerMouseX();
         int y = handler.centerMouseY();
         int squareIndex = handler.getAssets().getBoardSquare(x, y);
-        String currentFen = handler.getGameBoard().createFen();
+        final String currentFen = handler.getGameBoard().createFen();
         if (handler.getMouseManager().leftPressed()) {
-            if (x < 8 && y < 8) {
+            // Clicked on chess board
+            if (squareIndex != -1) {
                 // Place down pieces
                 if (display || dragged) { 
                     // Pawn cant be placed on 0th or 7th row
@@ -65,7 +66,7 @@ public class PlacementState extends State {
                 display = dragged = false;
             }
         }
-        // Right click as removal of pieces on bord or to stop dragging piece
+        // Right click as removal of pieces on board or to stop dragging/displaying piece
         if (handler.getMouseManager().rightPressed()) {
             if (display || dragged) {
                 display = dragged = false;
@@ -76,10 +77,10 @@ public class PlacementState extends State {
         }
         // Player modified board (by moving/adding/deleting piece)
         // clear game history
-        
         if (!currentFen.equals(handler.getGameBoard().createFen())) {
             System.out.println("Modification occured, clearing game history");
             handler.getGame().getDisplay().setText("");
+            handler.getHolder().clear();
         }
     }
 
@@ -90,8 +91,8 @@ public class PlacementState extends State {
         if (display || dragged) {
             g.drawImage(
                 pieceImage, 
-                handler.getMouseManager().getMouseX() - (handler.getAssets().PIECE_WIDTH/2),  // x
-                handler.getMouseManager().getMouseY() - (handler.getAssets().PIECE_HEIGHT/2), // y
+                handler.getMouseManager().getMouseX() - (pieceImage.getWidth()/2),  // X
+                handler.getMouseManager().getMouseY() - (pieceImage.getHeight()/2), // Y
                 null
             ); 
         }
@@ -176,4 +177,29 @@ public class PlacementState extends State {
             }
         });
     }
+
+    @Override
+    public void tick() {}
+
+
+    @Override
+    public boolean save(Holder holder) {
+        return true;
+    }
+
+    @Override
+    public boolean load(Holder holder) {
+        display = dragged = false; // Reset selected piece
+        return true;
+    }
+
+    @Override
+    public boolean canSave() {
+        return true;
+    }
+
+    @Override
+    public boolean canLoad() {
+        return true;
+    };
 }

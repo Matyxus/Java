@@ -1,8 +1,10 @@
 package states;
 import java.awt.Graphics;
+
+import assets.Data;
 import main.Handler;
 
-public abstract class State {
+public abstract class State implements Data {
     /**
      * Current running state, null if none is running
      */ 
@@ -21,9 +23,16 @@ public abstract class State {
 
     /** 
      *  Takes care of updating objects in given state 
-     *   in response to mouse events
+     *  in response to mouse events
      */
     public abstract void update();
+
+    /**
+     * Serves mainly to communicate with state,
+     * without user input (e.g. AI on another thread
+     * finished finding move)
+     */
+    public abstract void tick();
 
     /**
      * Adds buttons specific to each state

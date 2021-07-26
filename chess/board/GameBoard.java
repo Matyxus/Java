@@ -239,6 +239,14 @@ public class GameBoard {
         return currentPositon.getSideToMove();
     }
 
+    public void setRound(int round) {
+        gameHistory.setRound(round);
+    }
+
+    public int getRound() {
+        return gameHistory.getRound();
+    }
+
     /**
      * @return Fen String of current board
      */
@@ -271,9 +279,5 @@ public class GameBoard {
         result += "   A  B  C  D  E  F  G  H\n";
         result += "Fen: " + createFen() + "\n";
         return result;
-    }
-
-    public GameHistory getGameHistory() {
-        return gameHistory;
     }
 }

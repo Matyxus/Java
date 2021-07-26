@@ -1,10 +1,11 @@
 package main;
 
 import assets.Assets;
-import assets.Pair;
+import assets.Data.Holder;
 import board.GameBoard;
 import managers.FileManager;
 import managers.MouseManager;
+import states.State;
 
 public class Handler {
     private final Game game;
@@ -12,6 +13,7 @@ public class Handler {
     private final MouseManager mouseManager;
     private final Assets assets;
     private final FileManager fileManager;
+    private Holder holder;
 
     public Handler(Game game) {
         this.game = game;
@@ -19,33 +21,38 @@ public class Handler {
         this.mouseManager = new MouseManager();
         this.assets = new Assets();
         this.fileManager = new FileManager();
+        this.holder = new Holder();
     }
 
     /**
      * Loads game either from FEN or from file
      */
     public void loadGame() {
-        Pair<String, String> tmp = null;
-        try {
-            tmp = fileManager.loadFile();
-        } catch (Exception e) {
-            System.out.println(e);
-        }
-        if (!tmp.getKey().isEmpty()) {
-            if (gameBoard.loadFen(tmp.getKey())) {
-                System.out.println("Loading Success");
-                // Load text history
-                game.getDisplay().setText(tmp.getValue());
+        if (State.getState() != null && State.getState().canLoad()) {
+            Holder temp = new Holder();
+            if (fileManager.load(temp)) {
+                holder = temp;
+                // Load board -> Fen
+                gameBoard.loadFen(holder.getLastFen());
+                gameBoard.setRound(holder.getSize()-1);
+                // Set text
+                game.getDisplay().setText(holder.getText());
+                State.getState().load(holder);
             }
         }
     }
 
     /**
-     * Saves game into two files .txt and .png
-     * @param textHistory history of current game
+     * Saves game into two files .txt and .png if
+     * successful
      */
-    public void saveGame(String textHistory) {
-        fileManager.safeFile(textHistory, game.getGraphicsManager().getScreenShot(), gameBoard.createFen());
+    public void saveGame() {
+        if (State.getState() != null && State.getState().canSave()) {
+            fileManager.setScreenShot(game.getGraphicsManager().getScreenShot());
+            if (fileManager.save(holder)) {
+                State.getState().save(holder);
+            }
+        } 
     }
 
     /**
@@ -74,6 +81,13 @@ public class Handler {
      */
     public Game getGame() {
         return game;
+    }
+
+    /**
+     * @return Holder
+     */
+    public Holder getHolder() {
+        return holder;
     }
 
     /**

@@ -23,10 +23,10 @@ public class GameHistory {
         // Piece
         result += Pieces.pieceToUnicode[color][piece];
         // From square
-        result += (" (" + Size.SQUARE_TO_ALGEBRAIC[move.getFromSquare()] + ") ");
-        result += "  ->  ";
+        result += (" " + Size.SQUARE_TO_ALGEBRAIC[move.getFromSquare()]);
+        result += "   \u279D   ";
         // To Square
-        result += (" (" + Size.SQUARE_TO_ALGEBRAIC[move.getToSquare()] + ")\n");
+        result += (Size.SQUARE_TO_ALGEBRAIC[move.getToSquare()] + "\n");
         if (move.isCastle()) {
             result += "Castling: ";
             result += Pieces.pieceToUnicode[color][move.getCastleSide()] + " side\n";
@@ -53,7 +53,7 @@ public class GameHistory {
      * @param round to be set
      */
     public void setRound(int round) {
-        this.round = round;
+        this.round = (round < 0) ? 0 : round;
     }
     
     /**

@@ -2,51 +2,25 @@ package states;
 
 import java.awt.Graphics;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
 
 import assets.Pair;
-
-import static java.util.Map.entry;
-
 import board.Perft;
-import board.constants.Colors;
 import board.constants.Img;
-import board.constants.Pieces;
 import main.Handler;
 import managers.UIManager;
 import ui.PopUP;
 import ui.UIImageButton;
 
 public class ReplayState extends State {
+    
     /**
-     * Returns Map.Entry, where key is piece and value is color
+     * Array holding previously removed fen positions
      */
-    @SuppressWarnings("unused")
-    private final HashMap<String, Map.Entry<Integer, Integer>> unicodeToPiece = 
-        new HashMap<String, Map.Entry<Integer, Integer>>(Map.ofEntries(
-            // White Pieces
-            entry("\u2654",   entry(Pieces.KING, Colors.WHITE)),   
-            entry("\u2655",   entry(Pieces.QUEEN, Colors.WHITE)),  
-            entry("\u2656",   entry(Pieces.ROOK, Colors.WHITE)),   
-            entry("\u2658",   entry(Pieces.KNIGHT, Colors.WHITE)), 
-            entry("\u2657",   entry(Pieces.BISHOP, Colors.WHITE)), 
-            entry("\u2659",   entry(Pieces.PAWN, Colors.WHITE)), 
-            // Black Pieces
-            entry("\u265A",   entry(Pieces.KING, Colors.BLACK)),   
-            entry("\u265B",   entry(Pieces.QUEEN, Colors.BLACK)),  
-            entry("\u265C",   entry(Pieces.ROOK, Colors.BLACK)),   
-            entry("\u265E",   entry(Pieces.KNIGHT, Colors.BLACK)), 
-            entry("\u265D",   entry(Pieces.BISHOP, Colors.BLACK)), 
-            entry("\u265F",   entry(Pieces.PAWN, Colors.BLACK)) 
-    ));
-
-    // TO-DO: clear nextMoves when loading new game
+    private final ArrayList<String> previousFen;
     /**
-     * Array holding previously removed moves
+     * Array holding previously removed moves in text format
      */
-    @SuppressWarnings("unused")
-    private final ArrayList<String> nextMoves;
+    private final ArrayList<String> previousText;
     private final UIManager uiManager;
 
     private Thread perftRunner = null;
@@ -55,7 +29,8 @@ public class ReplayState extends State {
         super(handler);
         System.out.println("Initializing ReplayState");
         uiManager = new UIManager();
-        nextMoves = new ArrayList<String>();
+        previousFen = new ArrayList<String>();
+        previousText = new ArrayList<String>();
         handler.getMouseManager().setUiManager(uiManager);
         addButtons();
     }
@@ -64,7 +39,40 @@ public class ReplayState extends State {
         return (perftRunner != null && perftRunner.isAlive());
     }
 
+    private void showMove(boolean previous) {
+        String text = null;
+        String fen = null;
+        // Comparing size with one, since current position
+        // is last one in array, so the one before is needed
+        // and there is none before (when array size is 1)
+        if (previous && handler.getHolder().getSize() != 1) {
+            // Cannot be null
+            text = handler.getHolder().removeLastText();
+            fen = handler.getHolder().removeLastFen();
+            // Append it, if user wants to go "forward" in game
+            previousText.add(text);
+            previousFen.add(fen);
+            // Set display text
+            handler.getGame().getDisplay().setText(
+                handler.getHolder().getText()
+            );
+            // Load position
+            handler.getGameBoard().loadFen(
+                handler.getHolder().getLastFen()
+            );
+        } else if (!previous) {
+            text = previousText.remove(previousText.size()-1);
+            fen = previousFen.remove(previousFen.size()-1);
+            // Append it back
+            handler.getHolder().appendText(text);
+            handler.getHolder().appendFen(fen);
+            handler.getGame().getDisplay().appendText(text);
+            // Load position
+            handler.getGameBoard().loadFen(fen);
+        }
+    }
 
+    
     @Override
     public void render(Graphics g) {
         uiManager.render(g);
@@ -85,7 +93,10 @@ public class ReplayState extends State {
             ) {
             @Override
             public void onClick() {
-                System.out.println("Showing previous move");
+                // If there is something to show
+                if (handler.getHolder().getSize() != 0) {
+                    showMove(true);
+                }
             }
         });
 
@@ -99,13 +110,17 @@ public class ReplayState extends State {
             ) {
             @Override
             public void onClick() {
-                System.out.println("Showing next move");
+                // If there is something to show
+                if (previousFen.size() != 0) {
+                    showMove(false);
+                }
             }
         });
 
         // Button to start perft
         this.uiManager.addObject(new UIImageButton(
-                handler.getAssets().getBoardWidth(), handler.getAssets().PIECE_HEIGHT, // X, Y
+                handler.getAssets().getBoardWidth(),    // X
+                handler.getAssets().PIECE_HEIGHT,       // Y
                 2 * handler.getAssets().PIECE_WIDTH,    // Width
                 handler.getAssets().PIECE_HEIGHT,       // Height
                 handler.getAssets().getPerft_button(),  // Idle image
@@ -116,9 +131,6 @@ public class ReplayState extends State {
                 final Pair<Integer, Boolean> result = PopUP.perftSetupMessage();
                 if (result != null && !perftIsRunning()) {
                     final String currentFen = handler.getGameBoard().createFen();
-                    // Create new hashmaps of pieces
-                    // to pass into function, since modification
-                    // to current can occur in different thread
                     Runnable myrunnable = new Runnable() {
                         public void run() {
                             // Run perft
@@ -158,5 +170,30 @@ public class ReplayState extends State {
                 }
             }
         });
+    }
+
+    @Override
+    public void tick() {};
+
+    @Override
+    public boolean save(Holder holder) {
+        return true;
+    }
+
+    @Override
+    public boolean load(Holder holder) {
+        previousFen.clear();
+        previousText.clear();
+        return true;
+    }
+
+    @Override
+    public boolean canSave() {
+        return !perftIsRunning();
+    }
+
+    @Override
+    public boolean canLoad() {
+        return !perftIsRunning();
     }
 }
