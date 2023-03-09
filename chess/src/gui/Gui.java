@@ -125,7 +125,7 @@ public class Gui {
      */
     public int getBoardSquare() {
         if (mouseManager.getCurrMouseEvent() == null) {
-            return -1;
+            return Board.INVALID_SQUARE;
         }
         int x = mouseManager.getCurrMouseEvent().getX();
         int y = mouseManager.getCurrMouseEvent().getY();
@@ -139,6 +139,6 @@ public class Gui {
             // Return square on board
             return Board.COLS * y + x;
         }
-        return -1;
+        return Board.INVALID_SQUARE;
     }
 }

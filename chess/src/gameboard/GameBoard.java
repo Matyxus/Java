@@ -78,9 +78,9 @@ public class GameBoard {
         // Out of bounds
         if (square < 0 || square >= Board.BOARD_SIZE) {
             return null;
-        } else if (players[Colors.WHITE].containsPiece(square) != -1) {
+        } else if (players[Colors.WHITE].containsPiece(square) != Pieces.INVALID_PIECE) {
             return new Pair<Integer,Integer>(players[Colors.WHITE].containsPiece(square), Colors.WHITE);
-        } else if (players[Colors.BLACK].containsPiece(square) != -1) {
+        } else if (players[Colors.BLACK].containsPiece(square) != Pieces.INVALID_PIECE) {
             return new Pair<Integer,Integer>(players[Colors.BLACK].containsPiece(square), Colors.BLACK);
         }
         return null;
@@ -96,6 +96,11 @@ public class GameBoard {
         final int piece = players[currentPositon.getSideToMove()].getPlacedPieces()[move.getFromSquare()];
         final int offset = currentPositon.getSideToMove()*6; // Hashing offset
         final long moveMask = players[currentPositon.getSideToMove()].movePiece(move.getFromSquare(), move.getToSquare());
+        boolean reset_half_move = false;
+        // Increase full move number
+        if (currentPositon.getSideToMove() == Colors.BLACK) {
+            currentPositon.full_move_number += 1;
+        }
         // Change hash
         long key = zobrist.getPieceHash(offset + piece, move.getFromSquare());
         key ^= zobrist.getPieceHash(offset + piece, move.getToSquare());
@@ -105,7 +110,7 @@ public class GameBoard {
         }
         // Reset enpassant on board for current player
         currentPositon.setEnpassant(0);
-        int capture = -1;
+        int capture = Pieces.INVALID_PIECE;
         if (move.isCastle()) {
             // Move rook
             Pair<Integer, Integer> tmp = Castle.getCastleRookSquares(currentPositon.getSideToMove(), move.getCastleSide());
@@ -135,6 +140,8 @@ public class GameBoard {
             }
             // Capture
             if (move.isCapture()) {
+                // Whenever capture is made, rest half move clock
+                reset_half_move = true;
                 int to = move.getToSquare();
                 // Enpassant Capture
                 if (move.isEnpassant()) {
@@ -143,13 +150,18 @@ public class GameBoard {
                 capture = removePiece(Colors.oppositeColor(currentPositon.getSideToMove()), to);
                 // Change hash (offest is either 0 or 6 for white/black player)
                 key ^= zobrist.getPieceHash((offset ^ 6) + capture, to);
-            } else if (move.isEnpassant()) { // Move generating enpassant
-                // Set enpassant
-                currentPositon.setEnpassant(
-                    (move.getToSquare() + Board.enpassantDiff[currentPositon.getSideToMove()])
-                );
-                // Change hash
-                key ^= zobrist.getEnpassantHash(move.getToSquare() + Board.enpassantDiff[currentPositon.getSideToMove()]);
+            } else if (piece == Pieces.PAWN) {
+                // Whenever pawn plays, rest half move clock
+                reset_half_move = true;
+                // Move generating enpassant -> double push by pawn
+                if (move.isEnpassant()) {
+                    // Set enpassant
+                    currentPositon.setEnpassant(
+                        (move.getToSquare() + Board.enpassantDiff[currentPositon.getSideToMove()])
+                    );
+                    // Change hash
+                    key ^= zobrist.getEnpassantHash(currentPositon.getEnpassant());
+                }
             }
             // Promotion
             if (move.isPromotion()) {
@@ -159,6 +171,12 @@ public class GameBoard {
                 key ^= zobrist.getPieceHash(offset + piece, move.getToSquare());
                 key ^= zobrist.getPieceHash(offset + promoteTo, move.getToSquare());
             }
+        }
+        // Half move clock
+        if (reset_half_move) {
+            currentPositon.half_move_clock = 0;
+        } else {
+            currentPositon.half_move_clock++;
         }
         // Swap player
         currentPositon.swapPlayers();
@@ -174,6 +192,7 @@ public class GameBoard {
     public void undoMove(Move move, int capture, Position previous) {
         // Load back previous state
         currentPositon = previous.deepCopy();
+        // Castle
         if (move.isCastle()) {
             // Move rook
             Pair<Integer, Integer> tmp = Castle.getCastleRookSquares(currentPositon.getSideToMove(), move.getCastleSide());
@@ -184,7 +203,7 @@ public class GameBoard {
                 players[currentPositon.getSideToMove()].promotePiece(move.getToSquare(), Pieces.PAWN);
             }
             // Add captured piece back
-            if (capture != -1) {
+            if (capture != Pieces.INVALID_PIECE) {
                 int to = move.getToSquare();
                 // Captured using enpassant
                 if (move.isEnpassant()) {
@@ -193,6 +212,7 @@ public class GameBoard {
                 players[Colors.oppositeColor(currentPositon.getSideToMove())].addPiece(capture, to);
             }
         }
+        // Move original piece back
         players[currentPositon.getSideToMove()].movePiece(move.getToSquare(), move.getFromSquare());
     }
 
@@ -206,9 +226,19 @@ public class GameBoard {
         return players[color];
     }
 
+    /**
+     * @return Array of player pieces, indexed by color and square
+     * (e.g. getPieces()[Colors.WHITE][0 == 'a8'])
+     */
+    public int[][] getPieces() {
+        return new int[][] {players[Colors.WHITE].getPlacedPieces(), players[Colors.BLACK].getPlacedPieces()};
+    }
+
     public Position getCurrentPositon() {
         return currentPositon;
     }
+
+    // ------------------------ Utils ------------------------ 
     
     @Override
     public String toString() {
@@ -220,9 +250,9 @@ public class GameBoard {
             result += (Board.COLS - i) + " |";
             for (int j = 0; j < Board.ROWS; j++) {
                 String tmp = " ";
-                if (whitePieces[Board.ROWS * i + j] != -1) {
+                if (whitePieces[Board.ROWS * i + j] != Pieces.INVALID_PIECE) {
                     tmp = Pieces.pieceToUnicode[Colors.WHITE][whitePieces[Board.ROWS * i + j]];
-                } else if (blackPieces[Board.ROWS * i+ j] != -1) {
+                } else if (blackPieces[Board.ROWS * i+ j] != Pieces.INVALID_PIECE) {
                     tmp = Pieces.pieceToUnicode[Colors.BLACK][blackPieces[Board.ROWS * i + j]];
                 }
                 result += tmp + " |";

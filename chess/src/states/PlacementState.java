@@ -3,6 +3,7 @@ package states;
 import gui.Gui;
 import ui.ImageButton;
 import gameboard.ChessGame;
+import gameboard.constants.Board;
 import gameboard.constants.Colors;
 import gameboard.constants.Pieces;
 import utils.ImageConst;
@@ -16,8 +17,8 @@ import java.awt.event.MouseEvent;
  */
 public class PlacementState extends State {
 
-    private int displayPiece = -1;
-    private int displayColor = -1;
+    private int displayPiece = Pieces.INVALID_PIECE;
+    private int displayColor = Colors.INVALID_COLOR;
     private boolean dragged = false;
 
     public PlacementState(Gui gui, ChessGame chessGame) {
@@ -28,7 +29,7 @@ public class PlacementState extends State {
     @Override
     public void render(Gui gui) {
         // Render piece, which user clicked, on cursor
-        if (displayPiece != -1) {
+        if (displayPiece != Pieces.INVALID_PIECE) {
             gui.getGraphics().drawImage(
                 gui.getAssets().getPieceImg(displayPiece, displayColor), 
                 gui.getMouseManager().getCurrMouseEvent().getX() - (gui.getAssets().PIECE_WIDTH / 2),  // X
@@ -43,13 +44,13 @@ public class PlacementState extends State {
         // ----------------- Left click  -----------------  
         if (e.getButton() == MouseEvent.BUTTON1) {
             // Clicked on chess board
-            if (boardSquare != -1) {
+            if (boardSquare != Board.INVALID_SQUARE) {
                 // Place down displayed piece
-                if (displayPiece != -1) { 
+                if (displayPiece != Pieces.INVALID_PIECE) { 
                     chessGame.getGameBoard().addPiece(displayPiece, displayColor, boardSquare);
                     // Stop dragging piece
                     if (dragged) {
-                        set_piece(-1, -1);
+                        set_piece(Pieces.INVALID_PIECE, Colors.INVALID_COLOR);
                     }
                 // Pickup piece from board -> dragging
                 } else if (chessGame.getGameBoard().containsPiece(boardSquare) != null) {
@@ -60,14 +61,14 @@ public class PlacementState extends State {
                 }
             } else {
                 // Stop showing img
-                set_piece(-1, -1);
+                set_piece(Pieces.INVALID_PIECE, Colors.INVALID_COLOR);
             }
         }
         // ----------------- Right click  -----------------  
         if (e.getButton() == MouseEvent.BUTTON3) {
             // Stop rendering piece image on mouse
-            if (displayPiece != -1) {
-                set_piece(-1, -1);
+            if (displayPiece != Pieces.INVALID_PIECE) {
+                set_piece(Pieces.INVALID_PIECE, Colors.INVALID_COLOR);
             // Remove piece on board
             } else if (chessGame.getGameBoard().containsPiece(boardSquare) != null) {
                 chessGame.getGameBoard().removePiece(chessGame.getGameBoard().containsPiece(boardSquare).getValue(), boardSquare);
@@ -144,7 +145,7 @@ public class PlacementState extends State {
         displayPiece = piece;
         displayColor = color;
         // Deselecting piece
-        if (piece == -1) {
+        if (piece == Pieces.INVALID_PIECE) {
             dragged = false;
         }
     }    

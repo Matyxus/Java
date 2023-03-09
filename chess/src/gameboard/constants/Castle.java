@@ -122,5 +122,4 @@ public class Castle {
     public static boolean[][] getFullCastleRights() {
         return new boolean[][] {{true, true}, {true, true}};
     }
-
 }

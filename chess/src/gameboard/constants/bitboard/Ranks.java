@@ -14,7 +14,7 @@ public class Ranks  {
     public static final long[] ALL_RANKS = {RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8};
 
     /**
-     * Ranks for pawn promotion, indexed (e.g PROMOTION_RANKS[Colors.WHITE])
+     * Ranks for pawn promotion, indexed by color (e.g PROMOTION_RANKS[Colors.WHITE])
      */
     public static final long[] PROMOTION_RANKS = {RANK_1, RANK_8};
 

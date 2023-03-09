@@ -6,6 +6,7 @@ public class Board {
     public static final int BOARD_SIZE = 64;
     public static final int ROWS = 8;
     public static final int COLS = 8;
+    public static final int INVALID_SQUARE = -1;
     public static final long ONE = 0b1L;
     public static final long ZERO = 0b0L;
     /**
@@ -27,10 +28,23 @@ public class Board {
 
     /**
      * @param square on board in String format (e.g. "a8")
-     * @return square in an integer format
+     * @return square in an integer format, "-1" if square is invalid
      */
     public static int algebraicToSquare(String square) {
-        assert (square != null && square.length() == 2);
-        return (square.charAt(0)-'a')+ROWS*(ROWS-Character.getNumericValue(square.charAt(1)));
+        // Invalid string representing square
+        if (square == null || square.length() != 2) {
+            return INVALID_SQUARE;
+        // Invalid char represeting column
+        } else if (!(square.charAt(0) >= 'a' && square.charAt(0) <= 'h')) {
+            return INVALID_SQUARE;
+        // Invalid char represeting number
+        } else if (square.charAt(1) >= '1' && square.charAt(1) <= '8') {
+            return INVALID_SQUARE;
+        }
+        return (square.charAt(0) - 'a') + ROWS * (ROWS - Character.getNumericValue(square.charAt(1)));
     }
+
+
+
+    
 }

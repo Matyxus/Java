@@ -11,8 +11,8 @@ public class Move {
     private final int toSquare;
 
     /**
-     * Flag hold what type of move it is (e.g. PROMOTION | Pieces.QUEEN),
-     *  for enpassant it contains square (e.g. EN_PASSANT | 32)
+     * Flag hold what type of move it is (e.g. Flag.PROMOTION | Pieces.QUEEN),
+     * for enpassant it contains square (e.g. Flags.EN_PASSANT | 32)
      */
     private final int flag;
 

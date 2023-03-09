@@ -13,7 +13,6 @@ import java.util.ArrayList;
 
 
 public class GameState extends State {
-
     /*
      * Moves of selected piece
      */

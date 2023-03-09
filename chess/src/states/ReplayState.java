@@ -81,7 +81,7 @@ public class ReplayState extends State {
                 final Pair<Integer, Boolean> result = null; // PopUP.perftSetupMessage();
                 if (result != null && !perftIsRunning()) {
                     // TODO FEN
-                    final String currentFen = ""; // chessGame.getGameBoard().createFen();
+                    final String currentFen = chessGame.generateFEN();
                     Runnable myrunnable = new Runnable() {
                         @Override
                         public void run() {

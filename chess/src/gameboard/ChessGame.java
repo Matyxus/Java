@@ -41,6 +41,8 @@ public class ChessGame {
         return "";
    }
 
+   // ------------------------ Switching states ------------------------ 
+
     /**
      * Returns game to previous state
      */
@@ -54,6 +56,17 @@ public class ChessGame {
     public void nextState() {
 
     }
+
+    // ------------------------ Utils ------------------------ 
+
+    /**
+     * @return FEN string of current chess board
+     */
+    public String generateFEN() {
+        return fen.createFen(gameBoard.getPlayers(), gameBoard.getCurrentPositon());
+    }
+
+    // ------------------------ Getters ------------------------ 
 
     public GameBoard getGameBoard() {
         return gameBoard;

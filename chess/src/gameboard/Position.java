@@ -13,6 +13,16 @@ public class Position {
     private int enpassant;
     private long hash;
     /**
+     *  Number of moves both players have made 
+     *  since the last pawn advance or piece capture
+     */
+    public int half_move_clock = 0;
+    /**
+     * Number of completed turns in the game
+     * (increases every time BLACK player moves)
+     */
+    public int full_move_number = 0;
+    /**
      * Indexed by [Colors.WHITE / Colors.BLACK][Pieces.KING / Pieces.QUEEN] 
      */
     private final boolean[][] castlingRights;
@@ -33,7 +43,7 @@ public class Position {
     public void setEnpassant(int enpassant) {
         this.enpassant = enpassant;
     }
-
+    
     /**
      * @param hash to be set
      */
@@ -152,12 +162,14 @@ public class Position {
             (enpassant == 0) ? 
             "None" : Board.SQUARE_TO_ALGEBRAIC[Long.numberOfTrailingZeros(enpassant)]
         );
-        result += "Side to move: " + Colors.COLOR_TO_STRING[sideToMove] + "\n";
+        // result += "Side to move: " + Colors.COLOR_TO_STRING[sideToMove] + "\n";
         result += "Enpassant Square: " + enpassantSquare + "\n";
         result += "Hash: " + hash + "\n";
+        result += "Half move clock: " + half_move_clock + "\n";
+        result += "Full move number: " + full_move_number + "\n";
         // Castle rights
         for (int color = Colors.WHITE; color < Colors.COLOR_COUNT; color++) {
-            result += (Colors.COLOR_TO_STRING[color] + " castling rights:\n");
+            // result += (Colors.COLOR_TO_STRING[color] + " castling rights:\n");
             for (int piece : Pieces.CASTLING_SIDES) {
                 result += (
                     Pieces.pieceToString.get(piece) + " side: " + 

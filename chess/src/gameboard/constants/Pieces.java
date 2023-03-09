@@ -7,6 +7,7 @@ import java.util.Map;
  * Class containing constants associated with pieces
  */
 public class Pieces {
+    public static final int INVALID_PIECE = -1;
     public static final int KING        = 0;
     public static final int QUEEN       = 1;
     public static final int ROOK        = 2;
