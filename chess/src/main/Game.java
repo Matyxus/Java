@@ -1,7 +1,7 @@
 package main;
 
 import gui.Gui;
-import gameboard.ChessGame;
+import gameboard.ChessEngine;
 // States
 import states.State;
 import states.PlacementState;
@@ -9,11 +9,11 @@ import states.PlacementState;
 public class Game {
     private boolean running = false;
     private final Gui gui;
-    private final ChessGame chessGame;
+    private final ChessEngine chessGame;
 
     public Game(String title, int width, int height) {
         this.gui = new Gui(title, width, height);
-        this.chessGame = new ChessGame();
+        this.chessGame = new ChessEngine();
         State.setState(new PlacementState(gui, chessGame));
     }
 

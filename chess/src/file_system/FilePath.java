@@ -5,6 +5,23 @@ import java.io.File;
  */
 public class FilePath {
 
+    public enum FileTypes {
+        PNG(".png"),
+        JSON(".json");
+
+        private final String name;
+
+        private FileTypes(String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String toString() {
+            return this.name;
+        }
+
+    }
+
     /**
      * @return path to folder of project root (ends with "chess")
      */
@@ -27,8 +44,9 @@ public class FilePath {
         return new File(path).exists();
     }
 
+    // Strings pointing to imporant directories
     public static final String CWD    = getCWD();
     public static final String ASSETS = CWD + "\\data\\assets";
-    public static final String SAVES  = CWD + "\\data\\saves";
+    public static final String SAVES  = CWD + "\\data\\saves\\%s" + FileTypes.JSON;
 }
 

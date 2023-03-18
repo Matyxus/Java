@@ -16,23 +16,38 @@ public class Position {
      *  Number of moves both players have made 
      *  since the last pawn advance or piece capture
      */
-    public int half_move_clock = 0;
+    public int half_move_clock;
     /**
      * Number of completed turns in the game
      * (increases every time BLACK player moves)
      */
-    public int full_move_number = 0;
+    public int full_move_number;
     /**
      * Indexed by [Colors.WHITE / Colors.BLACK][Pieces.KING / Pieces.QUEEN] 
      */
     private final boolean[][] castlingRights;
     
 
+    /**
+     * Default constructor, sets half_move_clock and full_move_number to zero
+     * @param sideToMove color of side currently playing
+     * @param enpassant enpassant square
+     * @param hash Zobrist hash of current board and position
+     * @param castlingRights of players
+     */
     public Position(int sideToMove, int enpassant, long hash, boolean[][] castlingRights) {
         this.sideToMove = sideToMove;
         this.enpassant = enpassant;
         this.hash = hash;
         this.castlingRights = castlingRights;
+        this.half_move_clock = 0;
+        this.full_move_number = 0;
+    }
+
+    public Position(int sideToMove, int enpassant, long hash, boolean[][] castlingRights, int half_move_clock, int full_move_number) {
+        this(sideToMove, enpassant, hash, castlingRights);
+        this.half_move_clock = half_move_clock;
+        this.full_move_number = full_move_number;
     }
         
     // ------------------------------ Setters ------------------------------
@@ -129,7 +144,7 @@ public class Position {
             {castlingRights[Colors.WHITE][Pieces.KING], castlingRights[Colors.WHITE][Pieces.QUEEN]},
             {castlingRights[Colors.BLACK][Pieces.KING], castlingRights[Colors.BLACK][Pieces.QUEEN]}
         };
-        return new Position(sideToMove, enpassant, hash, temp);
+        return new Position(sideToMove, enpassant, hash, temp, half_move_clock, full_move_number);
     }
 
     @Override

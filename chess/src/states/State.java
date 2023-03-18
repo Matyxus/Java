@@ -2,7 +2,7 @@ package states;
 import gui.Gui;
 import java.awt.event.MouseEvent;
 
-import gameboard.ChessGame;
+import gameboard.ChessEngine;
 
 /**
  * Abstract class representing current state in game
@@ -12,13 +12,13 @@ public abstract class State {
     /**
      * Pointer to chess game
      */
-    protected final ChessGame chessGame;
+    protected final ChessEngine chessGame;
      /**
      * Current running state, null if none is running
      */ 
     private static State currentState = null;
     
-    public State(Gui gui, ChessGame chessGame) {
+    public State(Gui gui, ChessEngine chessGame) {
         this.chessGame = chessGame;
         gui.getUiManager().clear();
         addButtons(gui);
@@ -71,7 +71,7 @@ public abstract class State {
     /**
      * @return ChessGame in current state
      */
-    public ChessGame getChessGame() {
+    public ChessEngine getChessGame() {
         return chessGame;
     }
 

@@ -2,7 +2,7 @@ package states;
 
 import gui.Gui;
 import ui.ImageButton;
-import gameboard.ChessGame;
+import gameboard.ChessEngine;
 import gameboard.constants.Board;
 import gameboard.constants.Colors;
 import gameboard.constants.Pieces;
@@ -21,7 +21,7 @@ public class PlacementState extends State {
     private int displayColor = Colors.INVALID_COLOR;
     private boolean dragged = false;
 
-    public PlacementState(Gui gui, ChessGame chessGame) {
+    public PlacementState(Gui gui, ChessEngine chessGame) {
         super(gui, chessGame);
         System.out.println("Initialized PlacementState");
     }

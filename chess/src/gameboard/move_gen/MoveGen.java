@@ -79,7 +79,7 @@ public final class MoveGen {
         if (checkCount == 1) {
             // During check, we can only capture the piece giving check
             captures &= pathToBlock;
-            // Moves during check can either block piece (Queen/Rook/Bishop)
+            // Moves during check can be blocked (Queen/Rook/Bishop)
             if ((captures & players[enemyPlayer].getSliders()) != 0) {
                 moves = (pathToBlock ^ captures);
             } else { // Cant block pawn/knight

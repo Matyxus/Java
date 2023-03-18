@@ -2,7 +2,7 @@ package states;
 
 import gui.Gui;
 import ui.ImageButton;
-import gameboard.ChessGame;
+import gameboard.ChessEngine;
 import gameboard.constants.Colors;
 import gameboard.constants.Pieces;
 import utils.ImageConst;
@@ -23,7 +23,7 @@ public class ReplayState extends State {
      */
     private Thread perfThread = null;
 
-    public ReplayState(Gui gui, ChessGame chessGame) {
+    public ReplayState(Gui gui, ChessEngine chessGame) {
         super(gui, chessGame);
         System.out.println("Initialized PlacementState");
     }

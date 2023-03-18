@@ -35,6 +35,7 @@ public class GameBoard {
         for (Player player : players) {
             player.resetVals();
         }
+        currentPositon = new Position(Colors.WHITE, 0, 0, Castle.getFullCastleRights());
     }
 
     // ----------------------------------- Pieces ----------------------------------- 
@@ -72,7 +73,7 @@ public class GameBoard {
 
     /**
      * @param square on board
-     * @return Pair<piece, color>, null if no piece is on given square
+     * @return Pair(piece, color), null if no piece is on given square
      */
     public Pair<Integer, Integer> containsPiece(int square) {
         // Out of bounds
@@ -187,7 +188,8 @@ public class GameBoard {
 
     /**
      * @param move to be reversed
-     * @param capture Spot class previously captured
+     * @param capture captured piece by move
+     * @param previous Position of board
      */
     public void undoMove(Move move, int capture, Position previous) {
         // Load back previous state

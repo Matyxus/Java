@@ -43,9 +43,9 @@ public class Perft {
      */
     public Pair<Long, Long> run_perft(int depth, String fen, boolean detailedOutput) {
         // Check if Fen is legal
-        if (this.fen.isLegal(fen)) {
-            return null;
-        }
+        // if (this.fen.isLegal(fen)) {
+        //    return null;
+        // }
         if (detailedOutput) {
             System.out.println("Testing perft to depth: " + depth);
             System.out.println(board);

@@ -79,11 +79,6 @@ public class Castle {
         ))
     ));
 
-    /**
-     * Position where king must be to castle
-     */
-    public static final int[] correctKingPos = {60, 4};
-
     // ---------------------------- Getters ----------------------------
 
     /**

@@ -1,8 +1,5 @@
 package gameboard.history;
-
 import java.util.Arrays;
-
-import gameboard.Player;
 import gameboard.Position;
 import gameboard.constants.Pieces;
 import gameboard.constants.Colors;
@@ -10,26 +7,15 @@ import gameboard.constants.Board;
 import gameboard.constants.Castle;
 import utils.Pair;
 
-// https://www.chessprogramming.org/Forsyth-Edwards_Notation
 
+/**
+ * Class representing board as FEN
+ * https://www.chessprogramming.org/Forsyth-Edwards_Notation
+ */
 public class Fen {
     
     public Fen() {};
-
-    /**
-     * @param fen of chess position
-     * @return true if fen is valid, false otherwise
-     */
-    public boolean isLegal(String fen) {
-        return true;
-    }
-
-    public static void main(String[] args) {
-        Fen fenGenerator = new Fen();
-        String fen = "8/5k2/3p4/1p1Pp2p/pP2Pp1P/P4P1K/8/8 b - - 99 50";    
-        fenGenerator.interpretFen(fen);
-    }
-
+    
     /**
      * @param fen string representation of FEN position
      * @param position chess board position
@@ -73,10 +59,6 @@ public class Fen {
             System.out.println("Error, incorrect fen, sum of pieces and empty square is not 64, got: " + square);
             return null;
         }
-        System.out.println("White pieces: " + Arrays.toString(pieces[Colors.WHITE]));
-        System.out.println("Black pieces: " + Arrays.toString(pieces[Colors.BLACK]));
-        System.out.println("Splitted lenght: " + splitted.length);
-       
         // ----------------- Info ----------------- 
         // Side to move
         if (!(splitted[1].equals("w") || splitted[1].equals("b"))) {
@@ -132,12 +114,13 @@ public class Fen {
     }
 
     /**
-     * @param gameBoard
+     * @param pieces array of pieces on board
+     * @param position current board position
      * @return FEN notation in String
      */
-    public String createFen(Player[] players, Position position) {
-        final int[] whitePieces = players[Colors.WHITE].getPlacedPieces();
-        final int[] blackPieces = players[Colors.BLACK].getPlacedPieces();
+    public String createFen(int[][] pieces, Position position) {
+        final int[] whitePieces = pieces[Colors.WHITE];
+        final int[] blackPieces = pieces[Colors.BLACK];
         // ----------------- Board ----------------- 
         String result = "";
         int empty = 0;

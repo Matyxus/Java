@@ -1,5 +1,5 @@
 package gameboard;
-
+import java.util.Arrays;
 import gameboard.constants.Pieces;
 import gameboard.constants.Board;
 
@@ -30,12 +30,8 @@ public class Player {
      */
     public void resetVals() {
         allPieces = 0;
-        for (int i = 0; i < Pieces.PIECE_COUNT; i++) {
-            individualPieces[i] = 0;
-        }
-        for (int i = 0; i < Board.BOARD_SIZE; i++) {
-            placedPieces[i] = -1;
-        }
+        Arrays.fill(placedPieces, 0);
+        Arrays.fill(placedPieces, Pieces.INVALID_PIECE);
     }
 
     /**

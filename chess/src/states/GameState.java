@@ -1,6 +1,6 @@
 package states;
 import gui.Gui;
-import gameboard.ChessGame;
+import gameboard.ChessEngine;
 import gameboard.constants.Pieces;
 import gameboard.constants.bitboard.Ranks;
 import gameboard.constants.bitboard.Files;
@@ -19,7 +19,7 @@ public class GameState extends State {
     private ArrayList<Move> move_list = null;
     private Move promotionMove = null;
 
-    public GameState(Gui gui, ChessGame chessGame) {
+    public GameState(Gui gui, ChessEngine chessGame) {
         super(gui, chessGame);
         move_list = new ArrayList<Move>();
         System.out.println("Initialized PlacementState");
